@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mommy's Practical Baby Finds</title>
+    <!-- Import Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Import FontAwesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Import Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Very light gray/blue background */
+        }
+        /* Custom scrollbar for the category menu to make it look neat */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        /* Soft shadow for product cards */
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-20">
+
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
+            <!-- Profile Image Placeholder (You can change the image source later) -->
+            <img src="https://placehold.co/150x150/f472b6/ffffff?text=Mommy" alt="Profile" class="w-14 h-14 rounded-full border-2 border-pink-200 object-cover">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">My Practical Baby Finds</h1>
+                <p class="text-sm text-slate-500">Curated essentials for first-time moms! ✨</p>
+            </div>
+        </div>
+
+        <!-- Category Menu -->
+        <div class="max-w-3xl mx-auto px-2 pb-2">
+            <div id="category-menu" class="flex overflow-x-auto gap-2 py-2 px-2 no-scrollbar scroll-smooth">
+                <!-- Categories will be injected here by JavaScript -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-3xl mx-auto px-4 mt-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 id="current-category-title" class="text-lg font-bold text-slate-700">All Items</h2>
+            <span id="item-count" class="text-xs font-semibold bg-pink-100 text-pink-600 px-2 py-1 rounded-full">0 items</span>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Product cards will be injected here by JavaScript -->
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // HOW TO EDIT YOUR AFFILIATE LINKS & ITEMS
+        // ==========================================
+        
+        // 1. CATEGORIES LIST
+        const categories = [
+            { id: 'all', name: 'All Items', icon: 'fa-border-all' },
+            { id: 'clothes', name: 'Clothes & Apparel', icon: 'fa-tshirt' },
+            { id: 'nursery', name: 'Nursery', icon: 'fa-bed' },
+            { id: 'bath', name: 'Bath Essentials', icon: 'fa-bath' },
+            { id: 'diapering', name: 'Diapering Essentials', icon: 'fa-baby' },
+            { id: 'grooming', name: 'Care & Grooming', icon: 'fa-kit-medical' },
+            { id: 'feeding', name: 'Feeding Essentials', icon: 'fa-bottle-droplet' },
+            { id: 'laundry', name: 'Laundry Essentials', icon: 'fa-shirt' },
+            { id: 'helpful', name: 'Helpful Needs', icon: 'fa-lightbulb' },
+            { id: 'reviews', name: 'My Reviews & Videos', icon: 'fa-video' }
+        ];
+
+        // 2. YOUR PRODUCT LIST
+        // ==========================================
+        // EDITING GUIDE (Unsaon pag-add): 
+        // 1. I-copy ang isa ka block gikan sa opening brace { hangtod sa closing brace nga naay comma }, 
+        // 2. I-paste sa ubos.
+        // 3. I-change ang id number (kinahanglan lahi-lahi per item).
+        // 4. I-change ang categoryId (pilia sa listahan sa ibabaw).
+        // 5. I-paste ang imong picture link sulod sa single quotes sa 'image'.
+        // ==========================================
+        const products = [
+            // DIAPERING
+            {
+                id: 1,
+                categoryId: 'diapering',
+                name: 'Moose Gear Unscented Baby Wipes',
+                image: 'https://placehold.co/400x400/e2e8f0/475569?text=Moose+Gear+Wipes',
+                shopeeLink: 'https://shopee.ph/',
+                tiktokLink: 'https://tiktok.com/'
+            },
+            {
+                id: 2,
+                categoryId: 'diapering',
+                name: 'Sudocrem Diaper Rash Cream',
+                image: 'https://placehold.co/400x400/e2e8f0/475569?text=Sudocrem',
+                shopeeLink: 'https://shopee.ph/',
+                tiktokLink: 'https://tiktok.com/'
+            },
+            // CLOTHES
+            {
+                id: 3,
+                categoryId: 'clothes',
+                name: 'Newborn Tie-Side Shirt Set (Cotton)',
+                image: 'https://placehold.co/400x400/e2e8f0/475569?text=Tie-Side+Shirts',
+                shopeeLink: 'https://shopee.ph/',
+                tiktokLink: 'https://tiktok.com/'
+            },
+            // BATH
+            {
+                id: 4,
+                categoryId: 'bath',
+                name: 'Aveeno Baby Daily Wash & Shampoo',
+                image: 'https://placehold.co/400x400/e2e8f0/475569?text=Aveeno+Wash',
+                shopeeLink: 'https://shopee.ph/',
+                tiktokLink: 'https://tiktok.com/'
+            },
+            // FEEDING
+            {
+                id: 5,
+                categoryId: 'feeding',
+                name: 'Silicone Manual Breast Pump (Haakaa Style)',
+                image: 'https://placehold.co/400x400/e2e8f0/475569?text=Manual+Pump',
+                shopeeLink: 'https://shopee.ph/',
+                tiktokLink: 'https://tiktok.com/'
+            },
+             // GROOMING
+             {
+                id: 6,
+                categoryId: 'grooming',
+                name: 'Electric Baby Nail Trimmer',
+                image: 'https://placehold.co/400x400/e2e8f0/475569?text=Nail+Trimmer',
+                shopeeLink: 'https://shopee.ph/',
+                tiktokLink: 'https://tiktok.com/'
+            },
+            // MY REVIEWS & VIDEOS (Example)
+            {
+                id: 7,
+                categoryId: 'reviews',
+                name: 'My Honest Review: Best Wipes for Newborns!',
+                image: 'https://placehold.co/400x400/fbcfe8/be185d?text=Watch+My+Review',
+                videoLink: 'https://tiktok.com/', // <-- Ibutang imong video link diri
+                shopeeLink: 'https://shopee.ph/',
+                tiktokLink: 'https://tiktok.com/'
+            }
+        ];
+
+        let activeCategory = 'all';
+
+        // Function to render category buttons
+        function renderCategories() {
+            const menuContainer = document.getElementById('category-menu');
+            menuContainer.innerHTML = '';
+
+            categories.forEach(cat => {
+                const isActive = cat.id === activeCategory;
+                const button = document.createElement('button');
+                
+                // Styling the category pills (Pink when active, gray when inactive)
+                button.className = `flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+                    isActive 
+                    ? 'bg-pink-500 text-white shadow-md' 
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`;
+                
+                button.innerHTML = `<i class="fa-solid ${cat.icon}"></i> ${cat.name}`;
+                
+                // Add click event to filter products
+                button.onclick = () => {
+                    activeCategory = cat.id;
+                    renderCategories(); // Re-render to update active styling
+                    renderProducts();   // Update the product grid
+                    
+                    // Update Title
+                    document.getElementById('current-category-title').innerText = cat.name;
+                    
+                    // Smooth scroll menu to keep clicked item in view
+                    button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                };
+
+                menuContainer.appendChild(button);
+            });
+        }
+
+        // Function to render product cards
+        function renderProducts() {
+            const gridContainer = document.getElementById('product-grid');
+            gridContainer.innerHTML = '';
+
+            // Filter products based on selected category
+            const filteredProducts = activeCategory === 'all' 
+                ? products 
+                : products.filter(p => p.categoryId === activeCategory);
+
+            // Update item count badge
+            document.getElementById('item-count').innerText = `${filteredProducts.length} items`;
+
+            if (filteredProducts.length === 0) {
+                gridContainer.innerHTML = `
+                    <div class="col-span-2 md:col-span-3 text-center py-10 text-slate-400">
+                        <i class="fa-solid fa-box-open text-4xl mb-3"></i>
+                        <p>No items added to this category yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Create cards for each product
+            filteredProducts.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl overflow-hidden card-shadow flex flex-col transition-transform hover:-translate-y-1';
+                
+                card.innerHTML = `
+                    <!-- Product Image -->
+                    <div class="aspect-square w-full bg-slate-100 relative">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                    </div>
+                    
+                    <!-- Product Details -->
+                    <div class="p-3 flex flex-col flex-grow">
+                        <h3 class="text-sm font-bold text-slate-800 leading-tight mb-3 flex-grow line-clamp-2">${product.name}</h3>
+                        
+                        <!-- Affiliate Buttons container -->
+                        <div class="flex flex-col gap-2 mt-auto">
+                            <!-- Video Review Button (Mo-gawas lang kung butangan nimog videoLink) -->
+                            ${product.videoLink ? `
+                            <a href="${product.videoLink}" target="_blank" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm">
+                                <i class="fa-solid fa-play"></i> Watch Review
+                            </a>` : ''}
+
+                            <!-- Shopee Button -->
+                            ${product.shopeeLink ? `
+                            <a href="${product.shopeeLink}" target="_blank" class="w-full bg-[#ee4d2d] hover:bg-[#d74326] text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm">
+                                <i class="fa-solid fa-bag-shopping"></i> Shopee
+                            </a>` : ''}
+                            
+                            <!-- TikTok Button -->
+                            ${product.tiktokLink ? `
+                            <a href="${product.tiktokLink}" target="_blank" class="w-full bg-black hover:bg-zinc-800 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm">
+                                <i class="fa-brands fa-tiktok"></i> TikTok
+                            </a>` : ''}
+                        </div>
+                    </div>
+                `;
+                gridContainer.appendChild(card);
+            });
+        }
+
+        // Initialize the page on load
+        window.onload = () => {
+            renderCategories();
+            renderProducts();
+        };
+    </script>
+</body>
+</html>
