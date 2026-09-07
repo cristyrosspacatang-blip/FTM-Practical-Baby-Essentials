@@ -1,343 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mommy's Practical Baby Finds</title>
-    <!-- Import Tailwind CSS for modern, responsive styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Import FontAwesome for beautiful icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Import Google Fonts (Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .card-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        }
-    </style>
-</head>
-<body class="text-slate-800 pb-20 relative min-h-screen">
-
-    <!-- Header Section -->
-    <header class="bg-white shadow-sm sticky top-0 z-40">
-        <div class="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
-            <img src="https://placehold.co/150x150/f472b6/ffffff?text=Mommy" alt="Profile" class="w-14 h-14 rounded-full border-2 border-pink-200 object-cover">
-            <div>
-                <h1 class="text-xl font-bold text-slate-800">My Practical Baby Finds</h1>
-                <p class="text-sm text-slate-500">Curated essentials for first-time moms! ✨</p>
-            </div>
-        </div>
-
-        <!-- Category Menu -->
-        <div class="max-w-3xl mx-auto px-2 pb-2">
-            <div id="category-menu" class="flex overflow-x-auto gap-2 py-2 px-2 no-scrollbar scroll-smooth">
-                <!-- Categories injected by JS -->
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content Area -->
-    <main class="max-w-3xl mx-auto px-4 mt-6">
-        <div class="flex items-center justify-between mb-4">
-            <h2 id="current-category-title" class="text-lg font-bold text-slate-700">Loading items...</h2>
-            <span id="item-count" class="text-xs font-semibold bg-pink-100 text-pink-600 px-2 py-1 rounded-full">0 items</span>
-        </div>
-
-        <!-- Admin Controls (Hidden by default) -->
-        <div id="admin-controls" class="hidden mb-6">
-            <button id="btn-open-add-modal" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
-                <i class="fa-solid fa-plus"></i> Add New Product
-            </button>
-        </div>
-
-        <!-- Product Grid -->
-        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <!-- Product cards injected by JS -->
-        </div>
-    </main>
-
-    <!-- Footer with Secret Admin Lock -->
-    <footer class="max-w-3xl mx-auto px-4 mt-12 mb-4 flex justify-end">
-        <button id="btn-secret-login" class="text-slate-300 hover:text-slate-500 p-2 rounded-full transition-colors">
-            <i class="fa-solid fa-lock text-sm"></i>
-        </button>
-        <button id="btn-secret-logout" class="hidden text-slate-400 hover:text-pink-500 p-2 rounded-full transition-colors text-sm font-semibold">
-            Logout Admin
-        </button>
-    </footer>
-
-    <!-- MODALS -->
-    
-    <!-- 1. Admin Password Modal -->
-    <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-            <h3 class="text-lg font-bold mb-4 text-center">Admin Access</h3>
-            <p class="text-sm text-slate-500 mb-4 text-center">Enter your secret mommy password to add/edit items.</p>
-            <input type="password" id="admin-password" class="w-full border border-slate-300 rounded-lg px-4 py-2 mb-2 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500" placeholder="Enter password">
-            <p id="login-error" class="text-red-500 text-xs hidden mb-4">Incorrect password.</p>
-            <div class="flex gap-2 mt-4">
-                <button id="btn-cancel-login" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-semibold transition-colors">Cancel</button>
-                <button id="btn-submit-login" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold transition-colors">Login</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. Add Product Modal -->
+<!-- ... existing code ... -->
+    <!-- 2. Add/Edit Product Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
-            <h3 class="text-lg font-bold mb-4">Add New Item</h3>
+            <h3 id="modal-title" class="text-lg font-bold mb-4">Add New Item</h3>
             
             <div class="space-y-3">
+                <input type="hidden" id="input-id">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Product Name *</label>
                     <input type="text" id="input-name" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="e.g. Newborn Baby Wipes">
                 </div>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Category *</label>
-                    <select id="input-category" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500">
-                        <!-- Options populated by JS -->
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Image Link (URL) *</label>
-                    <input type="text" id="input-image" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="Paste image link here">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Shopee Link (Optional)</label>
-                    <input type="text" id="input-shopee" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://shopee.ph/...">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">TikTok Link (Optional)</label>
-                    <input type="text" id="input-tiktok" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://tiktok.com/...">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Video Review Link (Optional)</label>
-                    <input type="text" id="input-video" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="Link to your review video">
-                </div>
-            </div>
-
-            <p id="add-error" class="text-red-500 text-xs hidden mt-3">Please fill in all required fields (*).</p>
-            
-            <div class="flex gap-2 mt-6">
-                <button id="btn-cancel-add" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-semibold transition-colors">Cancel</button>
-                <button id="btn-submit-add" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold transition-colors flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-save"></i> Save Item
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAIN LOGIC (Firebase & UI) -->
-    <script type="module">
+<!-- ... existing code ... -->
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // 1. Firebase Configuration (Provided by environment)
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // 2. State Variables
-        let products = [];
-        let activeCategory = 'all';
-        let isAdmin = false; 
-        const ADMIN_PASSWORD = "mommy2024"; // <-- Your secret password here
-
-        const categories = [
-            { id: 'all', name: 'All Items', icon: 'fa-border-all' },
-            { id: 'clothes', name: 'Clothes & Apparel', icon: 'fa-tshirt' },
-            { id: 'nursery', name: 'Nursery', icon: 'fa-bed' },
-            { id: 'bath', name: 'Bath Essentials', icon: 'fa-bath' },
-            { id: 'diapering', name: 'Diapering Essentials', icon: 'fa-baby' },
-            { id: 'grooming', name: 'Care & Grooming', icon: 'fa-kit-medical' },
-            { id: 'feeding', name: 'Feeding Essentials', icon: 'fa-bottle-droplet' },
-            { id: 'laundry', name: 'Laundry Essentials', icon: 'fa-shirt' },
-            { id: 'helpful', name: 'Helpful Needs', icon: 'fa-lightbulb' },
-            { id: 'reviews', name: 'My Reviews & Videos', icon: 'fa-video' }
-        ];
-
-        // 3. Initialize Auth
-        const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        };
-
-        // 4. Set up UI Elements
-        const DOM = {
-            menu: document.getElementById('category-menu'),
-            grid: document.getElementById('product-grid'),
-            title: document.getElementById('current-category-title'),
-            count: document.getElementById('item-count'),
-            adminControls: document.getElementById('admin-controls'),
-            btnSecretLogin: document.getElementById('btn-secret-login'),
-            btnSecretLogout: document.getElementById('btn-secret-logout'),
-            // Login Modal
-            loginModal: document.getElementById('login-modal'),
-            adminPassword: document.getElementById('admin-password'),
-            btnLoginSubmit: document.getElementById('btn-submit-login'),
-            btnLoginCancel: document.getElementById('btn-cancel-login'),
-            loginError: document.getElementById('login-error'),
+<!-- ... existing code ... -->
             // Add Modal
             addModal: document.getElementById('add-modal'),
+            modalTitle: document.getElementById('modal-title'),
             btnAddOpen: document.getElementById('btn-open-add-modal'),
             btnAddSubmit: document.getElementById('btn-submit-add'),
             btnAddCancel: document.getElementById('btn-cancel-add'),
             addError: document.getElementById('add-error'),
             // Form inputs
+            inId: document.getElementById('input-id'),
             inName: document.getElementById('input-name'),
             inCat: document.getElementById('input-category'),
-            inImg: document.getElementById('input-image'),
-            inShopee: document.getElementById('input-shopee'),
-            inTiktok: document.getElementById('input-tiktok'),
-            inVideo: document.getElementById('input-video')
-        };
-
-        // Populate Category Dropdown in Form
-        categories.filter(c => c.id !== 'all').forEach(cat => {
-            const opt = document.createElement('option');
-            opt.value = cat.id;
-            opt.innerText = cat.name;
-            DOM.inCat.appendChild(opt);
-        });
-
-        // 5. Render Functions
-        function renderCategories() {
-            DOM.menu.innerHTML = '';
-            categories.forEach(cat => {
-                const isActive = cat.id === activeCategory;
-                const button = document.createElement('button');
-                button.className = `flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-                    isActive ? 'bg-pink-500 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-                }`;
-                button.innerHTML = `<i class="fa-solid ${cat.icon}"></i> ${cat.name}`;
-                button.onclick = () => {
-                    activeCategory = cat.id;
-                    renderCategories();
-                    renderProducts();
-                    DOM.title.innerText = cat.name;
-                    button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                };
-                DOM.menu.appendChild(button);
-            });
-        }
-
-        function renderProducts() {
-            DOM.grid.innerHTML = '';
-            
-            const filteredProducts = activeCategory === 'all' 
-                ? products 
-                : products.filter(p => p.categoryId === activeCategory);
-
-            DOM.count.innerText = `${filteredProducts.length} items`;
-            DOM.title.innerText = categories.find(c => c.id === activeCategory).name;
-
-            if (filteredProducts.length === 0) {
-                DOM.grid.innerHTML = `
-                    <div class="col-span-2 md:col-span-3 text-center py-10 text-slate-400">
-                        <i class="fa-solid fa-box-open text-4xl mb-3"></i>
-                        <p>No items added yet.</p>
-                    </div>
-                `;
-                return;
-            }
-
+<!-- ... existing code ... -->
             filteredProducts.forEach(product => {
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-xl overflow-hidden card-shadow flex flex-col relative transition-transform hover:-translate-y-1';
                 
-                // Admin Delete Button (Only visible if isAdmin)
-                const deleteBtnHTML = isAdmin ? `
-                    <button class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full shadow-md z-10 flex items-center justify-center hover:bg-red-600 transition-colors" onclick="window.deleteProduct('${product.id}')">
-                        <i class="fa-solid fa-trash text-xs"></i>
-                    </button>
+                // Admin Buttons (Only visible if isAdmin)
+                const adminBtnsHTML = isAdmin ? `
+                    <div class="absolute top-2 right-2 flex gap-1 z-10">
+                        <button class="bg-blue-500 text-white w-8 h-8 rounded-full shadow-md flex items-center justify-center hover:bg-blue-600 transition-colors" onclick="window.editProduct('${product.id}')">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button class="bg-red-500 text-white w-8 h-8 rounded-full shadow-md flex items-center justify-center hover:bg-red-600 transition-colors" onclick="window.deleteProduct('${product.id}')">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
                 ` : '';
 
                 card.innerHTML = `
-                    ${deleteBtnHTML}
+                    ${adminBtnsHTML}
                     <div class="aspect-square w-full bg-slate-100 relative">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/e2e8f0/475569?text=No+Image'">
-                    </div>
-                    <div class="p-3 flex flex-col flex-grow">
-                        <h3 class="text-sm font-bold text-slate-800 leading-tight mb-3 flex-grow line-clamp-2">${product.name}</h3>
-                        <div class="flex flex-col gap-2 mt-auto">
-                            ${product.videoLink ? `
-                            <a href="${product.videoLink}" target="_blank" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm">
-                                <i class="fa-solid fa-play"></i> Watch Review
-                            </a>` : ''}
-                            ${product.shopeeLink ? `
-                            <a href="${product.shopeeLink}" target="_blank" class="w-full bg-[#ee4d2d] hover:bg-[#d74326] text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm">
-                                <i class="fa-solid fa-bag-shopping"></i> Shopee
-                            </a>` : ''}
-                            ${product.tiktokLink ? `
-                            <a href="${product.tiktokLink}" target="_blank" class="w-full bg-black hover:bg-zinc-800 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm">
-                                <i class="fa-brands fa-tiktok"></i> TikTok
-                            </a>` : ''}
-                        </div>
-                    </div>
-                `;
-                DOM.grid.appendChild(card);
-            });
-        }
-
-        // 6. Admin Login Logic
-        DOM.btnSecretLogin.onclick = () => { DOM.loginModal.classList.remove('hidden'); DOM.adminPassword.focus(); };
-        DOM.btnLoginCancel.onclick = () => { DOM.loginModal.classList.add('hidden'); DOM.adminPassword.value = ''; DOM.loginError.classList.add('hidden'); };
-        
-        const processLogin = () => {
-            if (DOM.adminPassword.value === ADMIN_PASSWORD) {
-                isAdmin = true;
-                DOM.loginModal.classList.add('hidden');
-                DOM.adminControls.classList.remove('hidden');
-                DOM.btnSecretLogin.classList.add('hidden');
-                DOM.btnSecretLogout.classList.remove('hidden');
-                DOM.adminPassword.value = '';
-                DOM.loginError.classList.add('hidden');
-                renderProducts(); // Re-render to show delete buttons
-            } else {
-                DOM.loginError.classList.remove('hidden');
-            }
-        };
-        DOM.btnLoginSubmit.onclick = processLogin;
-        DOM.adminPassword.addEventListener('keypress', (e) => { if(e.key === 'Enter') processLogin(); });
-
-        DOM.btnSecretLogout.onclick = () => {
-            isAdmin = false;
-            DOM.adminControls.classList.add('hidden');
-            DOM.btnSecretLogin.classList.remove('hidden');
-            DOM.btnSecretLogout.classList.add('hidden');
-            renderProducts(); // Remove delete buttons
+<!-- ... existing code ... -->
+        // 7. Add/Edit Product Logic
+        DOM.btnAddOpen.onclick = () => {
+            DOM.modalTitle.innerText = "Add New Item";
+            DOM.inId.value = '';
+            DOM.inName.value = ''; DOM.inImg.value = ''; DOM.inShopee.value = ''; DOM.inTiktok.value = ''; DOM.inVideo.value = '';
+            DOM.addModal.classList.remove('hidden');
         };
 
-        // 7. Add Product Logic
-        DOM.btnAddOpen.onclick = () => DOM.addModal.classList.remove('hidden');
         DOM.btnAddCancel.onclick = () => {
             DOM.addModal.classList.add('hidden');
             DOM.addError.classList.add('hidden');
             // Clear inputs
-            DOM.inName.value = ''; DOM.inImg.value = ''; DOM.inShopee.value = ''; DOM.inTiktok.value = ''; DOM.inVideo.value = '';
+            DOM.inId.value = ''; DOM.inName.value = ''; DOM.inImg.value = ''; DOM.inShopee.value = ''; DOM.inTiktok.value = ''; DOM.inVideo.value = '';
         };
 
         DOM.btnAddSubmit.onclick = async () => {
@@ -358,15 +82,24 @@
             DOM.btnAddSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
             try {
-                // Save to Firestore Public Data Collection
-                const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-                await addDoc(productsRef, {
-                    name, categoryId, image, shopeeLink, tiktokLink, videoLink,
-                    createdAt: new Date().getTime()
-                });
+                const productId = DOM.inId.value;
+                if (productId) {
+                    // Update existing product
+                    const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
+                    await updateDoc(productRef, {
+                        name, categoryId, image, shopeeLink, tiktokLink, videoLink
+                    });
+                } else {
+                    // Save to Firestore Public Data Collection
+                    const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+                    await addDoc(productsRef, {
+                        name, categoryId, image, shopeeLink, tiktokLink, videoLink,
+                        createdAt: new Date().getTime()
+                    });
+                }
                 DOM.btnAddCancel.click(); // Close and reset modal
             } catch (error) {
-                console.error("Error adding product:", error);
+                console.error("Error saving product:", error);
                 alert("Failed to save item. Please check your connection.");
             } finally {
                 DOM.btnAddSubmit.disabled = false;
@@ -374,54 +107,21 @@
             }
         };
 
-        // Global Delete Function (attached to window so onclick in HTML string works)
-        window.deleteProduct = async (productId) => {
-            // Using a simple confirm logic in custom UI is better, but for this demo a direct delete is fast.
-            // Let's implement a safe try-catch
-            try {
-                const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
-                await deleteDoc(productRef);
-            } catch(error) {
-                console.error("Error deleting product:", error);
+        // Global Edit Function
+        window.editProduct = (productId) => {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                DOM.modalTitle.innerText = "Edit Item";
+                DOM.inId.value = product.id;
+                DOM.inName.value = product.name;
+                DOM.inCat.value = product.categoryId;
+                DOM.inImg.value = product.image;
+                DOM.inShopee.value = product.shopeeLink || '';
+                DOM.inTiktok.value = product.tiktokLink || '';
+                DOM.inVideo.value = product.videoLink || '';
+                DOM.addModal.classList.remove('hidden');
             }
         };
 
-        // 8. Start Application & Listen to Database
-        initAuth().then(() => {
-            onAuthStateChanged(auth, (user) => {
-                if (!user) return; // Guard clause
-
-                // Real-time listener for products
-                const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-                
-                onSnapshot(productsRef, async (snapshot) => {
-                    // Seed initial data if database is completely empty (First time setup)
-                    if (snapshot.empty && !window.hasSeeded) {
-                        window.hasSeeded = true;
-                        DOM.title.innerText = "Initializing data...";
-                        const defaultProducts = [
-                            { categoryId: 'diapering', name: 'Moose Gear Unscented Baby Wipes', image: 'https://placehold.co/400x400/e2e8f0/475569?text=Moose+Gear+Wipes', shopeeLink: 'https://shopee.ph/', tiktokLink: '', videoLink: '' },
-                            { categoryId: 'diapering', name: 'Sudocrem Diaper Rash Cream', image: 'https://placehold.co/400x400/e2e8f0/475569?text=Sudocrem', shopeeLink: 'https://shopee.ph/', tiktokLink: 'https://tiktok.com/', videoLink: '' },
-                            { categoryId: 'feeding', name: 'Silicone Manual Breast Pump', image: 'https://placehold.co/400x400/e2e8f0/475569?text=Manual+Pump', shopeeLink: 'https://shopee.ph/', tiktokLink: '', videoLink: '' }
-                        ];
-                        for (const item of defaultProducts) {
-                            await addDoc(productsRef, item);
-                        }
-                    } else {
-                        window.hasSeeded = true; // Prevent seeding again
-                        products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        // Sort by newest first based on createdAt (if it exists)
-                        products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                        renderProducts();
-                    }
-                }, (error) => {
-                    console.error("Error fetching data:", error);
-                    DOM.title.innerText = "Error loading items.";
-                });
-
-                renderCategories();
-            });
-        });
-    </script>
-</body>
-</html>
+        // Global Delete Function (attached to window so onclick in HTML string works)
+<!-- ... existing code ... -->
