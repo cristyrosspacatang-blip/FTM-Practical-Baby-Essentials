@@ -152,15 +152,13 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 1. Firebase Configuration (Provided by environment)
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // 2. State Variables
-        let products = [];
+        // 1. Core State
+        let products = [
+            // Mock data so the app looks populated even in local mode
+            { id: 'mock1', name: 'Super Soft Newborn Swaddle', categoryId: 'nursery', image: 'https://placehold.co/400x400/fbcfe8/be185d?text=Swaddle', shopeeLink: 'https://shopee.ph/', createdAt: Date.now() },
+            { id: 'mock2', name: 'Premium Unscented Baby Wipes', categoryId: 'diapering', image: 'https://placehold.co/400x400/fbcfe8/be185d?text=Baby+Wipes', tiktokLink: 'https://tiktok.com/', createdAt: Date.now() - 1000 },
+            { id: 'mock3', name: 'Organic Cotton Onesie Set', categoryId: 'clothes', image: 'https://placehold.co/400x400/fbcfe8/be185d?text=Onesie', shopeeLink: 'https://shopee.ph/', createdAt: Date.now() - 2000 }
+        ];
         let activeCategory = 'all';
         let isAdmin = false; 
         const ADMIN_PASSWORD = "mommy2024"; // <-- Your secret password here
@@ -178,16 +176,26 @@
             { id: 'reviews', name: 'My Reviews & Videos', icon: 'fa-video' }
         ];
 
-        // 3. Initialize Auth
-        const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        };
+        // 2. Safe Firebase Setup (Prevents crashing if config is missing)
+        let useFirebase = false;
+        let app, auth, db;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // 4. Set up UI Elements
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                const config = JSON.parse(__firebase_config);
+                if (Object.keys(config).length > 0) { // Ensure config is valid and not empty {}
+                    app = initializeApp(config);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    useFirebase = true;
+                }
+            }
+        } catch (error) {
+            console.warn("Running in local mode. Firebase config not detected or invalid.");
+        }
+
+        // 3. Set up UI Elements
         const DOM = {
             menu: document.getElementById('category-menu'),
             grid: document.getElementById('product-grid'),
@@ -196,13 +204,11 @@
             adminControls: document.getElementById('admin-controls'),
             btnSecretLogin: document.getElementById('btn-secret-login'),
             btnSecretLogout: document.getElementById('btn-secret-logout'),
-            // Login Modal
             loginModal: document.getElementById('login-modal'),
             adminPassword: document.getElementById('admin-password'),
             btnLoginSubmit: document.getElementById('btn-submit-login'),
             btnLoginCancel: document.getElementById('btn-cancel-login'),
             loginError: document.getElementById('login-error'),
-            // Add Modal
             addModal: document.getElementById('add-modal'),
             modalTitle: document.getElementById('modal-title'),
             btnAddOpen: document.getElementById('btn-open-add-modal'),
@@ -210,7 +216,6 @@
             btnAddCancel: document.getElementById('btn-cancel-add'),
             addError: document.getElementById('add-error'),
             addSystemError: document.getElementById('add-system-error'),
-            // Form inputs
             inId: document.getElementById('input-id'),
             inName: document.getElementById('input-name'),
             inCat: document.getElementById('input-category'),
@@ -228,7 +233,7 @@
             DOM.inCat.appendChild(opt);
         });
 
-        // 5. Render Functions
+        // 4. Render Functions
         function renderCategories() {
             DOM.menu.innerHTML = '';
             categories.forEach(cat => {
@@ -242,7 +247,6 @@
                     activeCategory = cat.id;
                     renderCategories();
                     renderProducts();
-                    DOM.title.innerText = cat.name;
                     button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 };
                 DOM.menu.appendChild(button);
@@ -257,13 +261,15 @@
                 : products.filter(p => p.categoryId === activeCategory);
 
             DOM.count.innerText = `${filteredProducts.length} items`;
-            DOM.title.innerText = categories.find(c => c.id === activeCategory).name;
+            
+            const categoryObj = categories.find(c => c.id === activeCategory);
+            DOM.title.innerText = categoryObj ? categoryObj.name : 'Items';
 
             if (filteredProducts.length === 0) {
                 DOM.grid.innerHTML = `
                     <div class="col-span-2 md:col-span-3 text-center py-10 text-slate-400">
                         <i class="fa-solid fa-box-open text-4xl mb-3"></i>
-                        <p>No items added yet.</p>
+                        <p>No items added in this category yet.</p>
                     </div>
                 `;
                 return;
@@ -312,7 +318,7 @@
             });
         }
 
-        // 6. Admin Login Logic
+        // 5. Admin Login Logic
         DOM.btnSecretLogin.onclick = () => { DOM.loginModal.classList.remove('hidden'); DOM.adminPassword.focus(); };
         DOM.btnLoginCancel.onclick = () => { DOM.loginModal.classList.add('hidden'); DOM.adminPassword.value = ''; DOM.loginError.classList.add('hidden'); };
         
@@ -341,10 +347,10 @@
             renderProducts(); // Remove edit/delete buttons
         };
 
-        // 7. Add/Edit Product Logic
+        // 6. Add/Edit Product Logic
         DOM.btnAddOpen.onclick = () => {
             DOM.modalTitle.innerText = "Add New Item";
-            DOM.inId.value = ''; // Clear ID to signify "Adding"
+            DOM.inId.value = ''; 
             DOM.inName.value = ''; DOM.inImg.value = ''; DOM.inShopee.value = ''; DOM.inTiktok.value = ''; DOM.inVideo.value = '';
             DOM.addError.classList.add('hidden');
             DOM.addSystemError.classList.add('hidden');
@@ -355,8 +361,6 @@
             DOM.addModal.classList.add('hidden');
             DOM.addError.classList.add('hidden');
             DOM.addSystemError.classList.add('hidden');
-            // Clear inputs
-            DOM.inId.value = ''; DOM.inName.value = ''; DOM.inImg.value = ''; DOM.inShopee.value = ''; DOM.inTiktok.value = ''; DOM.inVideo.value = '';
         };
 
         DOM.btnAddSubmit.onclick = async () => {
@@ -380,24 +384,33 @@
 
             try {
                 const productId = DOM.inId.value;
-                if (productId) {
-                    // UPDATE existing product
-                    const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
-                    await updateDoc(productRef, {
-                        name, categoryId, image, shopeeLink, tiktokLink, videoLink
-                    });
+                
+                if (useFirebase) {
+                    if (productId) {
+                        const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
+                        await updateDoc(productRef, { name, categoryId, image, shopeeLink, tiktokLink, videoLink });
+                    } else {
+                        const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+                        await addDoc(productsRef, { name, categoryId, image, shopeeLink, tiktokLink, videoLink, createdAt: new Date().getTime() });
+                    }
                 } else {
-                    // ADD new product to Firestore Public Data Collection
-                    const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-                    await addDoc(productsRef, {
-                        name, categoryId, image, shopeeLink, tiktokLink, videoLink,
-                        createdAt: new Date().getTime()
-                    });
+                    // Local Mode Fallback
+                    if (productId) {
+                        const idx = products.findIndex(p => p.id === productId);
+                        if (idx > -1) {
+                            products[idx] = { ...products[idx], name, categoryId, image, shopeeLink, tiktokLink, videoLink };
+                        }
+                    } else {
+                        products.push({ id: 'local_' + Date.now(), name, categoryId, image, shopeeLink, tiktokLink, videoLink, createdAt: Date.now() });
+                    }
+                    products.sort((a, b) => b.createdAt - a.createdAt);
+                    renderProducts();
                 }
+                
                 DOM.btnAddCancel.click(); // Close and reset modal
             } catch (error) {
                 console.error("Error saving product:", error);
-                DOM.addSystemError.classList.remove('hidden'); // Show error on form instead of alert()
+                DOM.addSystemError.classList.remove('hidden');
             } finally {
                 DOM.btnAddSubmit.disabled = false;
                 DOM.btnAddSubmit.innerHTML = '<i class="fa-solid fa-save"></i> Save Item';
@@ -425,39 +438,55 @@
 
         // Global Delete Function
         window.deleteProduct = async (productId) => {
-            // Using a simple try-catch for immediate deletion
             try {
-                const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
-                await deleteDoc(productRef);
+                if (useFirebase) {
+                    const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
+                    await deleteDoc(productRef);
+                } else {
+                    // Local Mode Fallback
+                    products = products.filter(p => p.id !== productId);
+                    renderProducts();
+                }
             } catch(error) {
                 console.error("Error deleting product:", error);
             }
         };
 
-        // 8. Start Application & Listen to Database
-        initAuth().then(() => {
-            onAuthStateChanged(auth, (user) => {
-                if (!user) return; // Guard clause - crucial for Firestore rules
+        // 7. Start Application
+        if (useFirebase) {
+            // Wait for authentication before loading from cloud
+            const initAuth = async () => {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            };
 
-                // Real-time listener for products
-                const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-                
-                onSnapshot(productsRef, async (snapshot) => {
-                    products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    // Sort by newest first based on createdAt
-                    products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    renderProducts();
-                }, (error) => {
-                    console.error("Error fetching data:", error);
-                    DOM.title.innerText = "Error loading items.";
+            initAuth().then(() => {
+                onAuthStateChanged(auth, (user) => {
+                    if (!user) return; // Guard clause
+                    const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+                    
+                    onSnapshot(productsRef, (snapshot) => {
+                        products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                        renderProducts();
+                    }, (error) => {
+                        console.error("Error fetching data:", error);
+                        DOM.title.innerText = "Error loading items.";
+                    });
                 });
-
-                renderCategories();
+            }).catch(err => {
+                console.error("Auth failed:", err);
+                DOM.title.innerText = "Connection error. Running locally.";
             });
-        }).catch(err => {
-            console.error("Auth failed:", err);
-            DOM.title.innerText = "App initialization failed.";
-        });
+        } 
+        
+        // Always render immediately so UI works regardless of database status
+        renderCategories();
+        renderProducts();
+        
     </script>
 </body>
 </html>
