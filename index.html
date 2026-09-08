@@ -6,7 +6,7 @@
     <title>Mommy's Practical Baby Finds</title>
     <!-- Import Tailwind CSS for modern, responsive styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Import FontAwesome for beautiful icons -->
+    <!-- Import FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Import Google Fonts (Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -56,9 +56,12 @@
         </div>
 
         <!-- Admin Controls (Hidden by default) -->
-        <div id="admin-controls" class="hidden mb-6">
-            <button id="btn-open-add-modal" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
+        <div id="admin-controls" class="hidden mb-6 flex flex-col sm:flex-row gap-2">
+            <button id="btn-open-add-modal" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
                 <i class="fa-solid fa-plus"></i> Add New Product
+            </button>
+            <button id="btn-export-code" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
+                <i class="fa-solid fa-code"></i> Export Code for GitHub
             </button>
         </div>
 
@@ -114,29 +117,29 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Image Link (URL) *</label>
-                    <input type="text" id="input-image" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="Paste image link here">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Image URL *</label>
+                    <input type="url" id="input-image" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://example.com/image.jpg">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Shopee Link (Optional)</label>
-                    <input type="text" id="input-shopee" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://shopee.ph/...">
+                    <input type="url" id="input-shopee" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://shopee.ph/...">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">TikTok Link (Optional)</label>
-                    <input type="text" id="input-tiktok" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://tiktok.com/...">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">TikTok Shop Link (Optional)</label>
+                    <input type="url" id="input-tiktok" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://vt.tiktok.com/...">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Video Review Link (Optional)</label>
-                    <input type="text" id="input-video" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="Link to your review video">
+                    <input type="url" id="input-video" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://tiktok.com/@user/video/...">
                 </div>
+
+                <p id="add-error" class="text-red-500 text-xs hidden">Please enter at least Product Name and Image URL.</p>
+                <p id="add-system-error" class="text-red-500 text-xs hidden"></p>
             </div>
 
-            <p id="add-error" class="text-red-500 text-xs hidden mt-3">Please fill in all required fields (*).</p>
-            <p id="add-system-error" class="text-red-500 text-xs hidden mt-3">Failed to save. Please try again.</p>
-            
             <div class="flex gap-2 mt-6">
                 <button id="btn-cancel-add" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-semibold transition-colors">Cancel</button>
                 <button id="btn-submit-add" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold transition-colors flex justify-center items-center gap-2">
@@ -146,11 +149,26 @@
         </div>
     </div>
 
+    <!-- 3. Export Code Modal -->
+    <div id="export-modal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl">
+            <h3 class="text-lg font-bold mb-2">Export Code for GitHub</h3>
+            <p class="text-xs text-slate-500 mb-3">Copy this block and replace line 125 (`const defaultMockProducts = [...]`) in your GitHub `index.html` file so everyone sees your newly added items!</p>
+            <textarea id="export-textarea" class="w-full h-48 border border-slate-300 rounded-lg p-3 text-xs font-mono bg-slate-50 focus:outline-none" readonly></textarea>
+            <div class="flex gap-2 mt-4">
+                <button id="btn-cancel-export" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-semibold transition-colors">Close</button>
+                <button id="btn-copy-export" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold transition-colors flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Copy Code
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN LOGIC (Firebase & UI) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Default mock data if local storage is completely empty
         const defaultMockProducts = [
@@ -248,7 +266,12 @@
             inImg: document.getElementById('input-image'),
             inShopee: document.getElementById('input-shopee'),
             inTiktok: document.getElementById('input-tiktok'),
-            inVideo: document.getElementById('input-video')
+            inVideo: document.getElementById('input-video'),
+            exportModal: document.getElementById('export-modal'),
+            btnExportCode: document.getElementById('btn-export-code'),
+            btnExportCancel: document.getElementById('btn-cancel-export'),
+            btnExportCopy: document.getElementById('btn-copy-export'),
+            exportTextarea: document.getElementById('export-textarea')
         };
 
         // Populate Category Dropdown in Form
@@ -385,6 +408,25 @@
             DOM.addSystemError.classList.add('hidden');
         };
 
+        DOM.btnExportCode.onclick = () => {
+            const formattedProducts = JSON.stringify(products, null, 4);
+            DOM.exportTextarea.value = `const defaultMockProducts = ${formattedProducts};`;
+            DOM.exportModal.classList.remove('hidden');
+        };
+
+        DOM.btnExportCancel.onclick = () => {
+            DOM.exportModal.classList.add('hidden');
+        };
+
+        DOM.btnExportCopy.onclick = () => {
+            DOM.exportTextarea.select();
+            document.execCommand('copy');
+            DOM.btnExportCopy.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            setTimeout(() => {
+                DOM.btnExportCopy.innerHTML = '<i class="fa-solid fa-copy"></i> Copy Code';
+            }, 2000);
+        };
+
         DOM.btnAddSubmit.onclick = async () => {
             const name = DOM.inName.value.trim();
             const categoryId = DOM.inCat.value;
@@ -406,32 +448,45 @@
 
             try {
                 const productId = DOM.inId.value;
+                const productData = { 
+                    name, 
+                    categoryId, 
+                    image, 
+                    shopeeLink, 
+                    tiktokLink, 
+                    videoLink,
+                    updatedAt: Date.now()
+                };
                 
                 if (useFirebase) {
                     if (productId) {
                         const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
-                        await updateDoc(productRef, { name, categoryId, image, shopeeLink, tiktokLink, videoLink });
+                        await setDoc(productRef, productData, { merge: true });
                     } else {
                         const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-                        await addDoc(productsRef, { name, categoryId, image, shopeeLink, tiktokLink, videoLink, createdAt: new Date().getTime() });
+                        await addDoc(productsRef, { ...productData, createdAt: Date.now() });
                     }
-                } else {
-                    // Local Storage Mode (Persists across reloads on this device)
-                    if (productId) {
-                        const idx = products.findIndex(p => p.id === productId);
-                        if (idx > -1) {
-                            products[idx] = { ...products[idx], name, categoryId, image, shopeeLink, tiktokLink, videoLink };
-                        }
+                }
+
+                // Update local array & storage for immediate UI update
+                if (productId) {
+                    const idx = products.findIndex(p => p.id === productId);
+                    if (idx > -1) {
+                        products[idx] = { ...products[idx], ...productData };
                     } else {
-                        products.unshift({ id: 'local_' + Date.now(), name, categoryId, image, shopeeLink, tiktokLink, videoLink, createdAt: Date.now() });
+                        products.unshift({ id: productId, ...productData, createdAt: Date.now() });
                     }
-                    saveLocalProducts();
-                    renderProducts();
+                } else if (!useFirebase) {
+                    products.unshift({ id: 'local_' + Date.now(), ...productData, createdAt: Date.now() });
                 }
                 
-                DOM.btnAddCancel.click();
+                saveLocalProducts();
+                renderProducts();
+                
+                DOM.addModal.classList.add('hidden');
             } catch (error) {
                 console.error("Error saving product:", error);
+                DOM.addSystemError.innerText = "Failed to save. Please check details and try again.";
                 DOM.addSystemError.classList.remove('hidden');
             } finally {
                 DOM.btnAddSubmit.disabled = false;
@@ -472,7 +527,6 @@
             }
         };
 
-        // 7. Start Application
         if (useFirebase) {
             const initAuth = async () => {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
