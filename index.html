@@ -8,11 +8,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
-    /* Custom scrollbar utility */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -24,6 +24,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
 
+  <!-- Header -->
   <header class="bg-white border-b border-pink-100 sticky top-0 z-30 shadow-sm">
     <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -41,12 +42,14 @@
     </div>
   </header>
 
+  <!-- Categories Navigation -->
   <nav class="bg-white border-b border-slate-100 py-3 sticky top-[73px] z-20 shadow-xs">
     <div class="max-w-4xl mx-auto px-4 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth" id="categoryContainer">
-      <!-- Generated dynamically by JS -->
+      <!-- Generated dynamically -->
     </div>
   </nav>
 
+  <!-- Main Content -->
   <main class="max-w-4xl mx-auto px-4 py-6 flex-1 w-full">
     
     <!-- Admin Toolbar (Visible when logged in) -->
@@ -65,8 +68,9 @@
       </div>
     </div>
 
+    <!-- Products Grid -->
     <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      <!-- Loading placeholder state -->
+      <!-- Loading state -->
       <div class="col-span-full py-12 text-center text-slate-400">
         <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 text-pink-400"></i>
         <p>Loading live baby finds...</p>
@@ -74,6 +78,7 @@
     </div>
   </main>
 
+  <!-- Add/Edit Product Modal -->
   <div id="productModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
       <button onclick="closeProductModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2">
@@ -122,63 +127,13 @@
       </form>
     </div>
   </div>
-const defaultMockProducts = [
-    {
-        "id": "local_1788874470863",
-        "name": "Unilove New Born Diaper",
-        "categoryId": "diapering",
-        "image": "https://down-ph.img.susercontent.com/file/ph-11134207-7rask-m6dcnf5ap1s34a@resize_w900_nl.webp",
-        "shopeeLink": "https://s.shopee.ph/9KhrD4glLt",
-        "tiktokLink": "https://s.shopee.ph/2VrX5MxBwj",
-        "videoLink": "",
-        "createdAt": 1788874470863
-    },
-    {
-        "id": "local_1788874265211",
-        "name": "Baby Bath Tub",
-        "categoryId": "bath",
-        "image": "https://down-ph.img.susercontent.com/file/ph-11134207-81ztg-mjj8ayk4ml1jba.webp",
-        "shopeeLink": "https://s.shopee.ph/5LBiQm0MuQ",
-        "tiktokLink": "https://vt.tiktok.com/ZS9Sj2XGR4ppT-xPS9n/",
-        "videoLink": "",
-        "createdAt": 1788874265211
-    },
-    {
-        "id": "local_1788874191996",
-        "name": "Baby Bath Towel with Hood",
-        "categoryId": "bath",
-        "image": "https://down-ph.img.susercontent.com/file/sg-11134201-7rfi5-m9qrtlvsi9ht79.webp",
-        "shopeeLink": "https://s.shopee.ph/3Vk4EkoEtT",
-        "tiktokLink": "https://vt.tiktok.com/ZS9kTLF2KA9bf-RMsLe/",
-        "videoLink": "",
-        "createdAt": 1788874191996
-    },
-    {
-        "id": "local_1788857507738",
-        "name": "Aveeno Baby Hair and Body Wash",
-        "categoryId": "bath",
-        "image": "https://images.ctfassets.net/j7jv1vcgqjb4/7nipTVU5W6qnC2FAtQTGYN/f0af83e8dddb106233d9da1eb2bc515f/avbaby-dmw-100ml-en-ph?w=1080&fm=avif&q=80",
-        "shopeeLink": "https://s.shopee.ph/1qbqEs2k5N",
-        "tiktokLink": "https://vt.tiktok.com/ZS9kT82DDXLHD-TK2uk/",
-        "videoLink": "",
-        "createdAt": 1788857507738
-    },
-    {
-        "id": "mock2",
-        "name": "Moose Gear Baby Wipes Premium Unscented",
-        "categoryId": "diapering",
-        "image": "https://down-ph.img.susercontent.com/file/sg-11134201-22110-ytu3piko3hkv92.webp",
-        "tiktokLink": "https://vt.tiktok.com/ZS9SjjdsmffjX-U4WVv/",
-        "createdAt": 1788836044982,
-        "shopeeLink": "https://down-ph.img.susercontent.com/file/sg-11134201-22110-ytu3piko3hkv92.webp",
-        "videoLink": ""
-    }
-];
+
   <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400 mt-auto">
-    <p>© Mommy's Practical Baby Finds • Live Sync Active</p>
+    <p>© Mommy's Practical Baby Finds • Real-time Sync Active</p>
   </footer>
 
   <script>
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyC51idfw9hvc6BkRGV1CDGz9NTNPlk0lGQ",
       authDomain: "mommy-finds.firebaseapp.com",
