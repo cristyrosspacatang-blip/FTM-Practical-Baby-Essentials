@@ -1,562 +1,387 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mommy's Practical Baby Finds</title>
-    <!-- Import Tailwind CSS for modern, responsive styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Import FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Import Google Fonts (Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .card-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Practical Baby Finds</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* Custom scrollbar utility */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
 </head>
-<body class="text-slate-800 pb-20 relative min-h-screen">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
 
-    <!-- Header Section -->
-    <header class="bg-white shadow-sm sticky top-0 z-40">
-        <div class="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
-            <img src="https://placehold.co/150x150/f472b6/ffffff?text=Mommy" alt="Profile" class="w-14 h-14 rounded-full border-2 border-pink-200 object-cover">
-            <div>
-                <h1 class="text-xl font-bold text-slate-800">My Practical Baby Finds</h1>
-                <p class="text-sm text-slate-500">Curated essentials for first-time moms! ✨</p>
-            </div>
+  <header class="bg-white border-b border-pink-100 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-full bg-pink-400 text-white font-bold flex items-center justify-center text-xl shadow-md">
+          Mommy
         </div>
-
-        <!-- Category Menu -->
-        <div class="max-w-3xl mx-auto px-2 pb-2">
-            <div id="category-menu" class="flex overflow-x-auto gap-2 py-2 px-2 no-scrollbar scroll-smooth">
-                <!-- Categories injected by JS -->
-            </div>
+        <div>
+          <h1 class="text-xl font-bold text-slate-900 leading-tight">My Practical Baby Finds</h1>
+          <p class="text-xs text-slate-500">Curated essentials for first-time moms! ✨</p>
         </div>
-    </header>
+      </div>
+      <button id="adminToggleBtn" onclick="openAdminLogin()" class="text-slate-400 hover:text-pink-500 p-2 transition">
+        <i class="fa-solid fa-lock text-lg"></i>
+      </button>
+    </div>
+  </header>
 
-    <!-- Main Content Area -->
-    <main class="max-w-3xl mx-auto px-4 mt-6">
-        <div class="flex items-center justify-between mb-4">
-            <h2 id="current-category-title" class="text-lg font-bold text-slate-700">Loading items...</h2>
-            <span id="item-count" class="text-xs font-semibold bg-pink-100 text-pink-600 px-2 py-1 rounded-full">0 items</span>
-        </div>
+  <nav class="bg-white border-b border-slate-100 py-3 sticky top-[73px] z-20 shadow-xs">
+    <div class="max-w-4xl mx-auto px-4 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth" id="categoryContainer">
+      <!-- Generated dynamically by JS -->
+    </div>
+  </nav>
 
-        <!-- Admin Controls (Hidden by default) -->
-        <div id="admin-controls" class="hidden mb-6 flex flex-col sm:flex-row gap-2">
-            <button id="btn-open-add-modal" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
-                <i class="fa-solid fa-plus"></i> Add New Product
-            </button>
-            <button id="btn-export-code" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
-                <i class="fa-solid fa-code"></i> Export Code for GitHub
-            </button>
-        </div>
-
-        <!-- Product Grid -->
-        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <!-- Product cards injected by JS -->
-        </div>
-    </main>
-
-    <!-- Footer with Secret Admin Lock -->
-    <footer class="max-w-3xl mx-auto px-4 mt-12 mb-4 flex justify-end">
-        <button id="btn-secret-login" class="text-slate-300 hover:text-slate-500 p-2 rounded-full transition-colors">
-            <i class="fa-solid fa-lock text-sm"></i>
-        </button>
-        <button id="btn-secret-logout" class="hidden text-slate-400 hover:text-pink-500 p-2 rounded-full transition-colors text-sm font-semibold">
-            Logout Admin
-        </button>
-    </footer>
-
-    <!-- MODALS -->
+  <main class="max-w-4xl mx-auto px-4 py-6 flex-1 w-full">
     
-    <!-- 1. Admin Password Modal -->
-    <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-            <h3 class="text-lg font-bold mb-4 text-center">Admin Access</h3>
-            <p class="text-sm text-slate-500 mb-4 text-center">Enter your secret mommy password to manage items.</p>
-            <input type="password" id="admin-password" class="w-full border border-slate-300 rounded-lg px-4 py-2 mb-2 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500" placeholder="Enter password">
-            <p id="login-error" class="text-red-500 text-xs hidden mb-4">Incorrect password.</p>
-            <div class="flex gap-2 mt-4">
-                <button id="btn-cancel-login" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-semibold transition-colors">Cancel</button>
-                <button id="btn-submit-login" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold transition-colors">Login</button>
-            </div>
-        </div>
+    <!-- Admin Toolbar (Visible when logged in) -->
+    <div id="adminBar" class="hidden mb-6 bg-pink-50 border border-pink-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+      <div class="flex items-center gap-2 text-pink-700 font-medium text-sm">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Admin Mode Active (Live Syncing)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openProductModal()" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition flex items-center gap-2">
+          <i class="fa-solid fa-plus"></i> Add New Product
+        </button>
+        <button onclick="logoutAdmin()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-xl text-sm font-medium transition">
+          Logout
+        </button>
+      </div>
     </div>
 
-    <!-- 2. Add/Edit Product Modal -->
-    <div id="add-modal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
-            <h3 id="modal-title" class="text-lg font-bold mb-4">Add New Item</h3>
-            
-            <div class="space-y-3">
-                <input type="hidden" id="input-id">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Product Name *</label>
-                    <input type="text" id="input-name" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="e.g. Newborn Baby Wipes">
-                </div>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Category *</label>
-                    <select id="input-category" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500">
-                        <!-- Options populated by JS -->
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Image URL *</label>
-                    <input type="url" id="input-image" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://example.com/image.jpg">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Shopee Link (Optional)</label>
-                    <input type="url" id="input-shopee" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://shopee.ph/...">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">TikTok Shop Link (Optional)</label>
-                    <input type="url" id="input-tiktok" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://vt.tiktok.com/...">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Video Review Link (Optional)</label>
-                    <input type="url" id="input-video" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500" placeholder="https://tiktok.com/@user/video/...">
-                </div>
-
-                <p id="add-error" class="text-red-500 text-xs hidden">Please enter at least Product Name and Image URL.</p>
-                <p id="add-system-error" class="text-red-500 text-xs hidden"></p>
-            </div>
-
-            <div class="flex gap-2 mt-6">
-                <button id="btn-cancel-add" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-semibold transition-colors">Cancel</button>
-                <button id="btn-submit-add" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold transition-colors flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-save"></i> Save Item
-                </button>
-            </div>
-        </div>
+    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Loading placeholder state -->
+      <div class="col-span-full py-12 text-center text-slate-400">
+        <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 text-pink-400"></i>
+        <p>Loading live baby finds...</p>
+      </div>
     </div>
+  </main>
 
-    <!-- 3. Export Code Modal -->
-    <div id="export-modal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl">
-            <h3 class="text-lg font-bold mb-2">Export Code for GitHub</h3>
-            <p class="text-xs text-slate-500 mb-3">Copy this block and replace line 125 (`const defaultMockProducts = [...]`) in your GitHub `index.html` file so everyone sees your newly added items!</p>
-            <textarea id="export-textarea" class="w-full h-48 border border-slate-300 rounded-lg p-3 text-xs font-mono bg-slate-50 focus:outline-none" readonly></textarea>
-            <div class="flex gap-2 mt-4">
-                <button id="btn-cancel-export" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-semibold transition-colors">Close</button>
-                <button id="btn-copy-export" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold transition-colors flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-copy"></i> Copy Code
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAIN LOGIC (Firebase & UI) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Default mock data if local storage is completely empty
-        const defaultMockProducts = [
-            { id: 'mock1', name: 'Super Soft Newborn Swaddle', categoryId: 'nursery', image: 'https://placehold.co/400x400/fbcfe8/be185d?text=Swaddle', shopeeLink: 'https://shopee.ph/', createdAt: Date.now() },
-            { id: 'mock2', name: 'Premium Unscented Baby Wipes', categoryId: 'diapering', image: 'https://placehold.co/400x400/fbcfe8/be185d?text=Baby+Wipes', tiktokLink: 'https://tiktok.com/', createdAt: Date.now() - 1000 },
-            { id: 'mock3', name: 'Organic Cotton Onesie Set', categoryId: 'clothes', image: 'https://placehold.co/400x400/fbcfe8/be185d?text=Onesie', shopeeLink: 'https://shopee.ph/', createdAt: Date.now() - 2000 }
-        ];
-
-        // 1. Core State with LocalStorage Persistence Fallback
-        let products = [];
-        let activeCategory = 'all';
-        let isAdmin = false; 
-        const ADMIN_PASSWORD = "mommy2024";
-
-        function loadLocalProducts() {
-            try {
-                const saved = localStorage.getItem('mommy_products');
-                if (saved) {
-                    products = JSON.parse(saved);
-                } else {
-                    products = defaultMockProducts;
-                    localStorage.setItem('mommy_products', JSON.stringify(products));
-                }
-            } catch (e) {
-                console.error("LocalStorage error:", e);
-                products = defaultMockProducts;
-            }
-        }
-
-        function saveLocalProducts() {
-            try {
-                localStorage.setItem('mommy_products', JSON.stringify(products));
-            } catch (e) {
-                console.error("LocalStorage save error:", e);
-            }
-        }
-
-        loadLocalProducts();
-
-        const categories = [
-            { id: 'all', name: 'All Items', icon: 'fa-border-all' },
-            { id: 'clothes', name: 'Clothes & Apparel', icon: 'fa-tshirt' },
-            { id: 'nursery', name: 'Nursery', icon: 'fa-bed' },
-            { id: 'bath', name: 'Bath Essentials', icon: 'fa-bath' },
-            { id: 'diapering', name: 'Diapering Essentials', icon: 'fa-baby' },
-            { id: 'grooming', name: 'Care & Grooming', icon: 'fa-kit-medical' },
-            { id: 'feeding', name: 'Feeding Essentials', icon: 'fa-bottle-droplet' },
-            { id: 'laundry', name: 'Laundry Essentials', icon: 'fa-shirt' },
-            { id: 'helpful', name: 'Helpful Needs', icon: 'fa-lightbulb' },
-            { id: 'reviews', name: 'My Reviews & Videos', icon: 'fa-video' }
-        ];
-
-        // 2. Safe Firebase Setup
-        let useFirebase = false;
-        let app, auth, db;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                const config = JSON.parse(__firebase_config);
-                if (Object.keys(config).length > 0) {
-                    app = initializeApp(config);
-                    auth = getAuth(app);
-                    db = getFirestore(app);
-                    useFirebase = true;
-                }
-            }
-        } catch (error) {
-            console.warn("Running in local persistent mode.");
-        }
-
-        const DOM = {
-            menu: document.getElementById('category-menu'),
-            grid: document.getElementById('product-grid'),
-            title: document.getElementById('current-category-title'),
-            count: document.getElementById('item-count'),
-            adminControls: document.getElementById('admin-controls'),
-            btnSecretLogin: document.getElementById('btn-secret-login'),
-            btnSecretLogout: document.getElementById('btn-secret-logout'),
-            loginModal: document.getElementById('login-modal'),
-            adminPassword: document.getElementById('admin-password'),
-            btnLoginSubmit: document.getElementById('btn-submit-login'),
-            btnLoginCancel: document.getElementById('btn-cancel-login'),
-            loginError: document.getElementById('login-error'),
-            addModal: document.getElementById('add-modal'),
-            modalTitle: document.getElementById('modal-title'),
-            btnAddOpen: document.getElementById('btn-open-add-modal'),
-            btnAddSubmit: document.getElementById('btn-submit-add'),
-            btnAddCancel: document.getElementById('btn-cancel-add'),
-            addError: document.getElementById('add-error'),
-            addSystemError: document.getElementById('add-system-error'),
-            inId: document.getElementById('input-id'),
-            inName: document.getElementById('input-name'),
-            inCat: document.getElementById('input-category'),
-            inImg: document.getElementById('input-image'),
-            inShopee: document.getElementById('input-shopee'),
-            inTiktok: document.getElementById('input-tiktok'),
-            inVideo: document.getElementById('input-video'),
-            exportModal: document.getElementById('export-modal'),
-            btnExportCode: document.getElementById('btn-export-code'),
-            btnExportCancel: document.getElementById('btn-cancel-export'),
-            btnExportCopy: document.getElementById('btn-copy-export'),
-            exportTextarea: document.getElementById('export-textarea')
-        };
-
-        // Populate Category Dropdown in Form
-        categories.filter(c => c.id !== 'all').forEach(cat => {
-            const opt = document.createElement('option');
-            opt.value = cat.id;
-            opt.innerText = cat.name;
-            DOM.inCat.appendChild(opt);
-        });
-
-        function renderCategories() {
-            DOM.menu.innerHTML = '';
-            categories.forEach(cat => {
-                const isActive = cat.id === activeCategory;
-                const button = document.createElement('button');
-                button.className = `flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-                    isActive ? 'bg-pink-500 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-                }`;
-                button.innerHTML = `<i class="fa-solid ${cat.icon}"></i> ${cat.name}`;
-                button.onclick = () => {
-                    activeCategory = cat.id;
-                    renderCategories();
-                    renderProducts();
-                    button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                };
-                DOM.menu.appendChild(button);
-            });
-        }
-
-        function renderProducts() {
-            DOM.grid.innerHTML = '';
-            
-            const filteredProducts = activeCategory === 'all' 
-                ? products 
-                : products.filter(p => p.categoryId === activeCategory);
-
-            DOM.count.innerText = `${filteredProducts.length} items`;
-            
-            const categoryObj = categories.find(c => c.id === activeCategory);
-            DOM.title.innerText = categoryObj ? categoryObj.name : 'Items';
-
-            if (filteredProducts.length === 0) {
-                DOM.grid.innerHTML = `
-                    <div class="col-span-2 md:col-span-3 text-center py-10 text-slate-400">
-                        <i class="fa-solid fa-box-open text-4xl mb-3"></i>
-                        <p>No items added in this category yet.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            filteredProducts.forEach(product => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-xl overflow-hidden card-shadow flex flex-col relative transition-transform hover:-translate-y-1';
-                
-                const adminBtnsHTML = isAdmin ? `
-                    <div class="absolute top-2 right-2 flex gap-1 z-10">
-                        <button class="bg-blue-500 text-white w-8 h-8 rounded-full shadow-md flex items-center justify-center hover:bg-blue-600 transition-colors" onclick="window.editProduct('${product.id}')" title="Edit Item">
-                            <i class="fa-solid fa-pen text-xs"></i>
-                        </button>
-                        <button class="bg-red-500 text-white w-8 h-8 rounded-full shadow-md flex items-center justify-center hover:bg-red-600 transition-colors" onclick="window.deleteProduct('${product.id}')" title="Delete Item">
-                            <i class="fa-solid fa-trash text-xs"></i>
-                        </button>
-                    </div>
-                ` : '';
-
-                card.innerHTML = `
-                    ${adminBtnsHTML}
-                    <div class="aspect-square w-full bg-slate-100 relative">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/e2e8f0/475569?text=No+Image'">
-                    </div>
-                    <div class="p-3 flex flex-col flex-grow">
-                        <h3 class="text-sm font-bold text-slate-800 leading-tight mb-3 flex-grow line-clamp-2">${product.name}</h3>
-                        <div class="flex flex-col gap-2 mt-auto">
-                            ${product.videoLink ? `
-                            <a href="${product.videoLink}" target="_blank" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm">
-                                <i class="fa-solid fa-play"></i> Watch Review
-                            </a>` : ''}
-                            ${product.shopeeLink ? `
-                            <a href="${product.shopeeLink}" target="_blank" class="w-full bg-[#ee4d2d] hover:bg-[#d74326] text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm">
-                                <i class="fa-solid fa-bag-shopping"></i> Shopee
-                            </a>` : ''}
-                            ${product.tiktokLink ? `
-                            <a href="${product.tiktokLink}" target="_blank" class="w-full bg-black hover:bg-zinc-800 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm">
-                                <i class="fa-brands fa-tiktok"></i> TikTok
-                            </a>` : ''}
-                        </div>
-                    </div>
-                `;
-                DOM.grid.appendChild(card);
-            });
-        }
-
-        DOM.btnSecretLogin.onclick = () => { DOM.loginModal.classList.remove('hidden'); DOM.adminPassword.focus(); };
-        DOM.btnLoginCancel.onclick = () => { DOM.loginModal.classList.add('hidden'); DOM.adminPassword.value = ''; DOM.loginError.classList.add('hidden'); };
+  <div id="productModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeProductModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+      <h2 id="modalTitle" class="text-xl font-bold text-slate-900 mb-4">Add New Product</h2>
+      
+      <form id="productForm" onsubmit="handleSaveProduct(event)" class="space-y-4">
+        <input type="hidden" id="productId">
         
-        const processLogin = () => {
-            if (DOM.adminPassword.value === ADMIN_PASSWORD) {
-                isAdmin = true;
-                DOM.loginModal.classList.add('hidden');
-                DOM.adminControls.classList.remove('hidden');
-                DOM.btnSecretLogin.classList.add('hidden');
-                DOM.btnSecretLogout.classList.remove('hidden');
-                DOM.adminPassword.value = '';
-                DOM.loginError.classList.add('hidden');
-                renderProducts();
-            } else {
-                DOM.loginError.classList.remove('hidden');
-            }
-        };
-        DOM.btnLoginSubmit.onclick = processLogin;
-        DOM.adminPassword.addEventListener('keypress', (e) => { if(e.key === 'Enter') processLogin(); });
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Product Title</label>
+          <input type="text" id="productTitle" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+        </div>
 
-        DOM.btnSecretLogout.onclick = () => {
-            isAdmin = false;
-            DOM.adminControls.classList.add('hidden');
-            DOM.btnSecretLogin.classList.remove('hidden');
-            DOM.btnSecretLogout.classList.add('hidden');
-            renderProducts();
-        };
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+          <select id="productCategory" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+            <option value="Feeding Essentials">Feeding Essentials</option>
+            <option value="Laundry Essentials">Laundry Essentials</option>
+            <option value="Helpful Needs">Helpful Needs</option>
+            <option value="My Reviews & Videos">My Reviews & Videos</option>
+            <option value="Diapering Essentials">Diapering Essentials</option>
+            <option value="Clothes & Apparel">Clothes & Apparel</option>
+          </select>
+        </div>
 
-        DOM.btnAddOpen.onclick = () => {
-            DOM.modalTitle.innerText = "Add New Item";
-            DOM.inId.value = ''; 
-            DOM.inName.value = ''; DOM.inImg.value = ''; DOM.inShopee.value = ''; DOM.inTiktok.value = ''; DOM.inVideo.value = '';
-            DOM.addError.classList.add('hidden');
-            DOM.addSystemError.classList.add('hidden');
-            DOM.addModal.classList.remove('hidden');
-        };
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Image URL</label>
+          <input type="url" id="productImage" required placeholder="https://..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+        </div>
 
-        DOM.btnAddCancel.onclick = () => {
-            DOM.addModal.classList.add('hidden');
-            DOM.addError.classList.add('hidden');
-            DOM.addSystemError.classList.add('hidden');
-        };
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Shopee Link (Optional)</label>
+          <input type="url" id="shopeeUrl" placeholder="https://shope.ee/..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+        </div>
 
-        DOM.btnExportCode.onclick = () => {
-            const formattedProducts = JSON.stringify(products, null, 4);
-            DOM.exportTextarea.value = `const defaultMockProducts = ${formattedProducts};`;
-            DOM.exportModal.classList.remove('hidden');
-        };
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">TikTok Shop Link (Optional)</label>
+          <input type="url" id="tiktokUrl" placeholder="https://vt.tiktok.com/..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+        </div>
 
-        DOM.btnExportCancel.onclick = () => {
-            DOM.exportModal.classList.add('hidden');
-        };
+        <button type="submit" id="saveBtn" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-xl shadow-md transition mt-2">
+          Save Product
+        </button>
+      </form>
+    </div>
+  </div>
 
-        DOM.btnExportCopy.onclick = () => {
-            DOM.exportTextarea.select();
-            document.execCommand('copy');
-            DOM.btnExportCopy.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-            setTimeout(() => {
-                DOM.btnExportCopy.innerHTML = '<i class="fa-solid fa-copy"></i> Copy Code';
-            }, 2000);
-        };
+  <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400 mt-auto">
+    <p>© Mommy's Practical Baby Finds • Live Sync Active</p>
+  </footer>
 
-        DOM.btnAddSubmit.onclick = async () => {
-            const name = DOM.inName.value.trim();
-            const categoryId = DOM.inCat.value;
-            const image = DOM.inImg.value.trim();
-            const shopeeLink = DOM.inShopee.value.trim();
-            const tiktokLink = DOM.inTiktok.value.trim();
-            const videoLink = DOM.inVideo.value.trim();
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC51idfw9hvc6BkRGV1CDGz9NTNPlk0lGQ",
+      authDomain: "mommy-finds.firebaseapp.com",
+      projectId: "mommy-finds",
+      storageBucket: "mommy-finds.firebasestorage.app",
+      messagingSenderId: "754624081001",
+      appId: "1:754624081001:web:cecd2f0b1d84ad998d06f8",
+      measurementId: "G-0HEWF1TZYF"
+    };
 
-            if (!name || !image) {
-                DOM.addError.classList.remove('hidden');
-                DOM.addSystemError.classList.add('hidden');
-                return;
-            }
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-            DOM.addError.classList.add('hidden');
-            DOM.addSystemError.classList.add('hidden');
-            DOM.btnAddSubmit.disabled = true;
-            DOM.btnAddSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+    let products = [];
+    let selectedCategory = "All Items";
+    let isAdmin = localStorage.getItem("mommyAdmin") === "true";
 
-            try {
-                const productId = DOM.inId.value;
-                const productData = { 
-                    name, 
-                    categoryId, 
-                    image, 
-                    shopeeLink, 
-                    tiktokLink, 
-                    videoLink,
-                    updatedAt: Date.now()
-                };
-                
-                if (useFirebase) {
-                    if (productId) {
-                        const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
-                        await setDoc(productRef, productData, { merge: true });
-                    } else {
-                        const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-                        await addDoc(productsRef, { ...productData, createdAt: Date.now() });
-                    }
-                }
+    const categories = [
+      "All Items",
+      "Feeding Essentials",
+      "Laundry Essentials",
+      "Helpful Needs",
+      "My Reviews & Videos",
+      "Diapering Essentials"
+    ];
 
-                // Update local array & storage for immediate UI update
-                if (productId) {
-                    const idx = products.findIndex(p => p.id === productId);
-                    if (idx > -1) {
-                        products[idx] = { ...products[idx], ...productData };
-                    } else {
-                        products.unshift({ id: productId, ...productData, createdAt: Date.now() });
-                    }
-                } else if (!useFirebase) {
-                    products.unshift({ id: 'local_' + Date.now(), ...productData, createdAt: Date.now() });
-                }
-                
-                saveLocalProducts();
-                renderProducts();
-                
-                DOM.addModal.classList.add('hidden');
-            } catch (error) {
-                console.error("Error saving product:", error);
-                DOM.addSystemError.innerText = "Failed to save. Please check details and try again.";
-                DOM.addSystemError.classList.remove('hidden');
-            } finally {
-                DOM.btnAddSubmit.disabled = false;
-                DOM.btnAddSubmit.innerHTML = '<i class="fa-solid fa-save"></i> Save Item';
-            }
-        };
+    const initialProducts = [
+      {
+        title: "Unilove New Born Diaper",
+        category: "Diapering Essentials",
+        image: "https://cf.shopee.ph/file/ph-11134207-7r98o-lst1w10p4aep5c",
+        shopeeUrl: "https://shopee.ph",
+        tiktokUrl: "https://tiktok.com"
+      },
+      {
+        title: "Baby Bath Tub",
+        category: "Helpful Needs",
+        image: "https://cf.shopee.ph/file/ph-11134207-7qul3-lhx02m4x29g1a9",
+        shopeeUrl: "https://shopee.ph",
+        tiktokUrl: "https://tiktok.com"
+      },
+      {
+        title: "Baby Bath Towel with Hood",
+        category: "Helpful Needs",
+        image: "https://cf.shopee.ph/file/ph-11134207-7qul6-li22m0s4r9l02b",
+        shopeeUrl: "https://shopee.ph",
+        tiktokUrl: "https://tiktok.com"
+      },
+      {
+        title: "Aveeno Baby Hair and Body Wash",
+        category: "Helpful Needs",
+        image: "https://cf.shopee.ph/file/ph-11134207-7qul5-lh1l1g52s4j42a",
+        shopeeUrl: "https://shopee.ph",
+        tiktokUrl: "https://tiktok.com"
+      },
+      {
+        title: "Moose Gear Baby Wipes Premium Unscented",
+        category: "Diapering Essentials",
+        image: "https://cf.shopee.ph/file/ph-11134207-7qul2-lg04y3e8a4a58b",
+        shopeeUrl: "https://shopee.ph",
+        tiktokUrl: "https://tiktok.com"
+      }
+    ];
 
-        window.editProduct = (productId) => {
-            const product = products.find(p => p.id === productId);
-            if (product) {
-                DOM.modalTitle.innerText = "Edit Item";
-                DOM.inId.value = product.id;
-                DOM.inName.value = product.name;
-                DOM.inCat.value = product.categoryId;
-                DOM.inImg.value = product.image;
-                DOM.inShopee.value = product.shopeeLink || '';
-                DOM.inTiktok.value = product.tiktokLink || '';
-                DOM.inVideo.value = product.videoLink || '';
-                
-                DOM.addError.classList.add('hidden');
-                DOM.addSystemError.classList.add('hidden');
-                DOM.addModal.classList.remove('hidden');
-            }
-        };
+    window.addEventListener("DOMContentLoaded", () => {
+      renderCategories();
+      updateAdminUI();
+      listenToFirestore();
+    });
 
-        window.deleteProduct = async (productId) => {
-            try {
-                if (useFirebase) {
-                    const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
-                    await deleteDoc(productRef);
-                } else {
-                    products = products.filter(p => p.id !== productId);
-                    saveLocalProducts();
-                    renderProducts();
-                }
-            } catch(error) {
-                console.error("Error deleting product:", error);
-            }
-        };
+    function listenToFirestore() {
+      db.collection("products").onSnapshot((snapshot) => {
+        if (snapshot.empty) {
+          initialProducts.forEach(prod => {
+            db.collection("products").add({ ...prod, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+          });
+        } else {
+          products = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          renderProducts();
+        }
+      }, (error) => {
+        console.error("Firestore Error: ", error);
+      });
+    }
 
-        if (useFirebase) {
-            const initAuth = async () => {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            };
+    function renderCategories() {
+      const container = document.getElementById("categoryContainer");
+      container.innerHTML = categories.map(cat => `
+        <button onclick="selectCategory('${cat}')" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+          selectedCategory === cat 
+            ? "bg-pink-500 text-white shadow-sm" 
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+        }">
+          ${cat}
+        </button>
+      `).join("");
+    }
 
-            initAuth().then(() => {
-                onAuthStateChanged(auth, (user) => {
-                    if (!user) return;
-                    const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-                    
-                    onSnapshot(productsRef, (snapshot) => {
-                        products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                        renderProducts();
-                    }, (error) => {
-                        console.error("Error fetching data:", error);
-                    });
-                });
-            }).catch(err => {
-                console.error("Auth failed:", err);
-            });
-        } 
-        
-        renderCategories();
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      renderCategories();
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById("productsGrid");
+      const filtered = selectedCategory === "All Items" 
+        ? products 
+        : products.filter(p => p.category === selectedCategory);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-400">
+            <i class="fa-solid fa-box-open text-4xl mb-2"></i>
+            <p>No items found in this category yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(item => `
+        <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 flex flex-col justify-between relative group hover:shadow-md transition">
+          ${isAdmin ? `
+            <div class="absolute top-3 right-3 z-10 flex gap-2 bg-white/90 backdrop-blur-xs p-1.5 rounded-full shadow-md">
+              <button onclick="openProductModal('${item.id}')" class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition">
+                <i class="fa-solid fa-pen text-xs"></i>
+              </button>
+              <button onclick="deleteProduct('${item.id}')" class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition">
+                <i class="fa-solid fa-trash text-xs"></i>
+              </button>
+            </div>
+          ` : ''}
+          <div>
+            <div class="aspect-square w-full rounded-2xl overflow-hidden bg-pink-50 mb-3">
+              <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://via.placeholder.com/300?text=Baby+Item'">
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm mb-3 line-clamp-2">${item.title}</h3>
+          </div>
+          <div class="space-y-2 mt-auto">
+            ${item.shopeeUrl ? `
+              <a href="${item.shopeeUrl}" target="_blank" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition">
+                <i class="fa-solid fa-bag-shopping"></i> Shopee
+              </a>
+            ` : ''}
+            ${item.tiktokUrl ? `
+              <a href="${item.tiktokUrl}" target="_blank" class="w-full bg-slate-900 hover:bg-black text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition">
+                <i class="fa-brands fa-tiktok"></i> TikTok
+              </a>
+            ` : ''}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function openAdminLogin() {
+      if (isAdmin) return;
+      const pass = prompt("Enter secret admin password:");
+      if (pass === "mommy2024") {
+        isAdmin = true;
+        localStorage.setItem("mommyAdmin", "true");
+        updateAdminUI();
         renderProducts();
-        
-    </script>
+      } else if (pass !== null) {
+        alert("Incorrect password!");
+      }
+    }
+
+    function logoutAdmin() {
+      isAdmin = false;
+      localStorage.removeItem("mommyAdmin");
+      updateAdminUI();
+      renderProducts();
+    }
+
+    function updateAdminUI() {
+      const adminBar = document.getElementById("adminBar");
+      if (isAdmin) {
+        adminBar.classList.remove("hidden");
+      } else {
+        adminBar.classList.add("hidden");
+      }
+    }
+
+    function openProductModal(id = null) {
+      const modal = document.getElementById("productModal");
+      const title = document.getElementById("modalTitle");
+      
+      if (id) {
+        const item = products.find(p => p.id === id);
+        if (!item) return;
+        document.getElementById("productId").value = item.id;
+        document.getElementById("productTitle").value = item.title;
+        document.getElementById("productCategory").value = item.category;
+        document.getElementById("productImage").value = item.image;
+        document.getElementById("shopeeUrl").value = item.shopeeUrl || '';
+        document.getElementById("tiktokUrl").value = item.tiktokUrl || '';
+        title.innerText = "Edit Product";
+      } else {
+        document.getElementById("productForm").reset();
+        document.getElementById("productId").value = '';
+        title.innerText = "Add New Product";
+      }
+      modal.classList.remove("hidden");
+    }
+
+    function closeProductModal() {
+      document.getElementById("productModal").classList.add("hidden");
+    }
+
+    async function handleSaveProduct(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.disabled = true;
+      saveBtn.innerText = "Saving to Database...";
+
+      const id = document.getElementById("productId").value;
+      const data = {
+        title: document.getElementById("productTitle").value,
+        category: document.getElementById("productCategory").value,
+        image: document.getElementById("productImage").value,
+        shopeeUrl: document.getElementById("shopeeUrl").value,
+        tiktokUrl: document.getElementById("tiktokUrl").value,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        if (id) {
+          await db.collection("products").doc(id).update(data);
+        } else {
+          data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          await db.collection("products").add(data);
+        }
+        closeProductModal();
+      } catch (err) {
+        alert("Error saving product: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = "Save Product";
+      }
+    }
+
+    async function deleteProduct(id) {
+      if (confirm("Are you sure you want to delete this product?")) {
+        try {
+          await db.collection("products").doc(id).delete();
+        } catch (err) {
+          alert("Error deleting product: " + err.message);
+        }
+      }
+    }
+  </script>
 </body>
 </html>
