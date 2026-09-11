@@ -3,16 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Practical Baby Finds</title>
+  <title>My Practical Baby Finds & Scrapbook Reviews</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Scrapbook Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-handwriting {
+      font-family: 'Caveat', cursive;
+    }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -20,60 +31,118 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    
+    /* Scrapbook Aesthetics */
+    .washi-tape {
+      background: rgba(251, 113, 133, 0.4);
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.4) 10px, rgba(255, 255, 255, 0.4) 20px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      clip-path: polygon(2% 0%, 98% 0%, 100% 100%, 0% 100%);
+    }
+    .washi-tape-yellow {
+      background: rgba(250, 204, 21, 0.5);
+      background-image: repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(255, 255, 255, 0.5) 8px, rgba(255, 255, 255, 0.5) 16px);
+    }
+    .polaroid-frame {
+      background: #ffffff;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .polaroid-frame:hover {
+      transform: translateY(-4px) rotate(0deg) !important;
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15);
+    }
+    .scrapbook-bg {
+      background-color: #fdfbf7;
+      background-image: radial-gradient(#e5e7eb 0.75px, transparent 0.75px);
+      background-size: 16px 16px;
+    }
+    .paper-note {
+      background: #fef9c3;
+      box-shadow: 2px 3px 8px rgba(0,0,0,0.06);
+    }
+    .tape-edge {
+      mask-image: linear-gradient(to right, black 80%, transparent 100%);
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-white border-b border-pink-100 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+  <header class="bg-white/90 backdrop-blur-md border-b border-pink-100 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-full bg-pink-400 text-white font-bold flex items-center justify-center text-xl shadow-md">
-          Mommy
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-pink-400 to-rose-300 text-white font-bold flex items-center justify-center text-xl shadow-md shadow-pink-200">
+          🌸
         </div>
         <div>
-          <h1 class="text-xl font-bold text-slate-900 leading-tight">My Practical Baby Finds</h1>
-          <p class="text-xs text-slate-500">Curated essentials for first-time moms! ✨</p>
+          <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 leading-tight tracking-tight">
+            My Practical Baby Finds
+          </h1>
+          <p class="text-xs font-medium text-rose-500 flex items-center gap-1">
+            <span>✨ Curated essentials & mom reviews</span>
+          </p>
         </div>
       </div>
-      <button id="adminToggleBtn" onclick="openAdminLoginModal()" class="text-slate-400 hover:text-pink-500 p-2 transition">
-        <i class="fa-solid fa-lock text-lg"></i>
+      <button id="adminToggleBtn" onclick="openAdminLoginModal()" class="text-slate-400 hover:text-pink-500 p-2.5 rounded-xl hover:bg-pink-50 transition">
+        <i class="fa-solid fa-lock text-base"></i>
       </button>
     </div>
   </header>
 
   <!-- Categories Navigation -->
-  <nav class="bg-white border-b border-slate-100 py-3 sticky top-[73px] z-20 shadow-xs">
-    <div class="max-w-4xl mx-auto px-4 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth" id="categoryContainer">
+  <nav class="bg-white/80 backdrop-blur-sm border-b border-slate-100 py-3 sticky top-[65px] z-20">
+    <div class="max-w-5xl mx-auto px-4 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth items-center" id="categoryContainer">
       <!-- Generated dynamically -->
     </div>
   </nav>
 
   <!-- Main Content -->
-  <main class="max-w-4xl mx-auto px-4 py-6 flex-1 w-full">
+  <main class="max-w-5xl mx-auto px-4 py-6 flex-1 w-full">
     
     <!-- Admin Toolbar (Visible when logged in) -->
     <div id="adminBar" class="hidden mb-6 bg-pink-50 border border-pink-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
       <div class="flex items-center gap-2 text-pink-700 font-medium text-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
         <i class="fa-solid fa-user-shield"></i>
         <span>Admin Mode Active (Live Syncing)</span>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="openProductModal()" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition flex items-center gap-2">
-          <i class="fa-solid fa-plus"></i> Add New Product
+        <button onclick="openProductModal()" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-pink-200 transition flex items-center gap-2">
+          <i class="fa-solid fa-plus"></i> Add Item / Review
         </button>
-        <button onclick="logoutAdmin()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-xl text-sm font-medium transition">
+        <button onclick="logoutAdmin()" class="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition">
           Logout
         </button>
       </div>
     </div>
 
-    <!-- Products Grid -->
-    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <!-- Category Header Banner for Scrapbook -->
+    <div id="scrapbookBanner" class="hidden mb-6 p-5 rounded-3xl bg-gradient-to-r from-pink-100 via-rose-50 to-amber-50 border border-pink-200/60 relative overflow-hidden">
+      <div class="washi-tape absolute -top-2 left-8 w-28 h-6 rotate-[-2deg] z-10 opacity-80"></div>
+      <div class="washi-tape washi-tape-yellow absolute -bottom-2 right-12 w-28 h-6 rotate-[3deg] z-10 opacity-80"></div>
+      <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <span class="px-2.5 py-1 bg-white/80 rounded-full text-[11px] font-bold text-rose-600 border border-rose-200 inline-block mb-1 shadow-2xs">
+            📸 Scrapbook Mode
+          </span>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-800 font-handwriting tracking-wide">
+            Mommy's Personal Reviews & Highlight Clips 📖
+          </h2>
+          <p class="text-xs text-slate-600 mt-0.5">
+            Real photos, honest reviews & direct video timestamp highlights for your peace of mind!
+          </p>
+        </div>
+        <span class="text-3xl hidden sm:block">✂️🎨</span>
+      </div>
+    </div>
+
+    <!-- Products & Reviews Grid -->
+    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Loading state -->
-      <div class="col-span-full py-12 text-center text-slate-400">
-        <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 text-pink-400"></i>
-        <p>Loading live baby finds...</p>
+      <div class="col-span-full py-16 text-center text-slate-400">
+        <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-pink-400"></i>
+        <p class="text-sm font-medium">Loading live baby finds & reviews...</p>
       </div>
     </div>
   </main>
@@ -84,16 +153,19 @@
       <button onclick="closeAdminLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2">
         <i class="fa-solid fa-xmark text-xl"></i>
       </button>
-      <h2 class="text-xl font-bold text-slate-900 mb-2">Admin Login</h2>
-      <p class="text-xs text-slate-500 mb-4">Enter password to manage your products.</p>
+      <div class="w-12 h-12 rounded-2xl bg-pink-100 text-pink-500 flex items-center justify-center text-xl mb-3">
+        <i class="fa-solid fa-key"></i>
+      </div>
+      <h2 class="text-xl font-bold text-slate-900 mb-1">Admin Access</h2>
+      <p class="text-xs text-slate-500 mb-4">Enter secret password to edit products & scrapbook reviews.</p>
       
       <form onsubmit="handleAdminLogin(event)" class="space-y-4">
         <div>
-          <input type="password" id="adminPassword" placeholder="Enter secret password" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+          <input type="password" id="adminPassword" placeholder="Enter secret password" required class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
         </div>
-        <p id="loginError" class="text-xs text-red-500 hidden">Incorrect password!</p>
-        <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2.5 rounded-xl shadow-md transition">
-          Login
+        <p id="loginError" class="text-xs text-rose-500 hidden font-semibold">Incorrect password!</p>
+        <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-2.5 rounded-xl shadow-md transition hover:opacity-95">
+          Login as Admin
         </button>
       </form>
     </div>
@@ -102,37 +174,46 @@
   <!-- Delete Confirmation Modal -->
   <div id="deleteModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-xs w-full p-6 shadow-2xl text-center">
-      <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+      <div class="w-12 h-12 bg-red-100 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
         <i class="fa-solid fa-trash-can"></i>
       </div>
       <h3 class="text-base font-bold text-slate-800 mb-1">Delete Product?</h3>
-      <p class="text-xs text-slate-500 mb-5">Are you sure you want to remove this item?</p>
+      <p class="text-xs text-slate-500 mb-5">Are you sure you want to remove this item from your feed?</p>
       <div class="flex gap-2">
-        <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2 rounded-xl text-xs font-semibold">Cancel</button>
-        <button id="confirmDeleteBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl text-xs font-semibold">Delete</button>
+        <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl text-xs font-bold">Cancel</button>
+        <button id="confirmDeleteBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-md">Delete</button>
       </div>
     </div>
   </div>
 
-  <!-- Add/Edit Product Modal -->
+  <!-- Add/Edit Product & Scrapbook Modal -->
   <div id="productModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto no-scrollbar">
       <button onclick="closeProductModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2">
         <i class="fa-solid fa-xmark text-xl"></i>
       </button>
-      <h2 id="modalTitle" class="text-xl font-bold text-slate-900 mb-4">Add New Product</h2>
+      
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-500 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <div>
+          <h2 id="modalTitle" class="text-lg font-bold text-slate-900">Add New Item</h2>
+          <p class="text-xs text-slate-500">Fill in details for your affiliate or review post</p>
+        </div>
+      </div>
       
       <form id="productForm" onsubmit="handleSaveProduct(event)" class="space-y-4">
         <input type="hidden" id="productId">
         
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Product Title</label>
-          <input type="text" id="productTitle" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+          <label class="block text-xs font-bold text-slate-700 mb-1">Product Title / Title Review</label>
+          <input type="text" id="productTitle" required placeholder="e.g. Newborn Gentle Diaper Review" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
-          <select id="productCategory" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+          <label class="block text-xs font-bold text-slate-700 mb-1">Category</label>
+          <select id="productCategory" onchange="toggleCategoryFields()" required class="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none bg-white">
             <option value="Clothes & Apparel">Clothes & Apparel</option>
             <option value="Nursery">Nursery</option>
             <option value="Bath Essentials">Bath Essentials</option>
@@ -142,40 +223,98 @@
             <option value="Laundry Essentials">Laundry Essentials</option>
             <option value="Helpful Needs">Helpful Needs</option>
             <option value="Mommy Essentials">Mommy Essentials</option>
-            <option value="My Reviews & Videos">My Reviews & Videos</option>
+            <option value="My Reviews & Videos">My Reviews & Videos (Scrapbook Style 📸)</option>
           </select>
         </div>
 
+        <!-- Main Cover Image -->
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Image URL</label>
-          <input type="url" id="productImage" required placeholder="https://..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+          <label class="block text-xs font-bold text-slate-700 mb-1">Main Cover Image URL</label>
+          <input type="url" id="productImage" required placeholder="https://..." class="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+        </div>
+
+        <!-- Scrapbook & Review Special Section -->
+        <div id="scrapbookFields" class="p-4 bg-amber-50/60 border border-amber-200/80 rounded-2xl space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+              ✂️ Scrapbook & Video Details
+            </span>
+            <span class="text-[10px] text-amber-700 font-medium">Multiple photos & video highlights</span>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">
+              Multiple Photos (One URL per line)
+            </label>
+            <textarea id="productImages" rows="3" placeholder="https://image1.jpg&#10;https://image2.jpg&#10;https://image3.jpg" class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-pink-400 outline-none font-mono"></textarea>
+            <p class="text-[10px] text-slate-500 mt-1">First photo will be the main polaroid cover.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Mommy's Star Rating</label>
+            <select id="productRating" class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-pink-400 outline-none bg-white">
+              <option value="5">⭐⭐⭐⭐⭐ (5/5 - Highly Recommended!)</option>
+              <option value="4">⭐⭐⭐⭐ (4/5 - Great Buy)</option>
+              <option value="3">⭐⭐⭐ (3/5 - Okay / Decent)</option>
+              <option value="2">⭐⭐ (2/2 - Average)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Mommy's Honest Review / Journal Note</label>
+            <textarea id="productReviewNote" rows="2" placeholder="e.g. Super soft material, didn't cause any rashes on baby's skin! Foldable and lightweight..." class="w-full border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-pink-400 outline-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Video Highlight Segment / Part Note</label>
+            <input type="text" id="videoHighlightNote" placeholder="e.g. Watch starting 0:45 for the stroller folding test! 🎥" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-400 outline-none">
+          </div>
+        </div>
+
+        <!-- Affiliate Links -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Shopee Link (Optional)</label>
+            <input type="url" id="shopeeUrl" placeholder="https://shope.ee/..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-400 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">TikTok Video / Shop Link (Optional)</label>
+            <input type="url" id="tiktokUrl" placeholder="https://vt.tiktok.com/..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-400 outline-none">
+          </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Shopee Link (Optional)</label>
-          <input type="url" id="shopeeUrl" placeholder="https://shope.ee/..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
+          <label class="block text-xs font-bold text-slate-700 mb-1">Facebook Video Link (Optional)</label>
+          <input type="url" id="facebookUrl" placeholder="https://facebook.com/watch/..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-400 outline-none">
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">TikTok Shop Link (Optional)</label>
-          <input type="url" id="tiktokUrl" placeholder="https://vt.tiktok.com/..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-pink-400 outline-none">
-        </div>
-
-        <button type="submit" id="saveBtn" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-xl shadow-md transition mt-2">
-          Save Product
+        <button type="submit" id="saveBtn" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-3 rounded-xl shadow-md transition hover:opacity-95 mt-2">
+          Save Product & Review
         </button>
       </form>
     </div>
   </div>
 
+  <!-- Image Lightbox Modal for Full View -->
+  <div id="lightboxModal" class="fixed inset-0 bg-slate-900/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4" onclick="closeLightbox()">
+    <div class="relative max-w-3xl w-full flex flex-col items-center justify-center" onclick="event.stopPropagation()">
+      <button onclick="closeLightbox()" class="absolute -top-10 right-0 text-white/80 hover:text-white p-2 text-2xl">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <img id="lightboxImg" src="" alt="Full view" class="max-h-[80vh] w-auto max-w-full rounded-2xl shadow-2xl object-contain border-4 border-white/20">
+      <p id="lightboxCaption" class="text-white text-xs mt-3 text-center font-medium bg-black/40 px-4 py-1.5 rounded-full"></p>
+    </div>
+  </div>
+
   <!-- Notification Toast -->
-  <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white text-xs py-3 px-5 rounded-2xl shadow-xl transition opacity-0 pointer-events-none z-50 flex items-center gap-2">
-    <i id="toastIcon" class="fa-solid fa-circle-check text-green-400 text-sm"></i>
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs py-3 px-5 rounded-2xl shadow-2xl transition opacity-0 pointer-events-none z-50 flex items-center gap-2.5">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
     <span id="toastMsg">Action completed</span>
   </div>
 
   <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400 mt-auto">
-    <p>© Mommy's Practical Baby Finds • Real-time Sync Active</p>
+    <p>© Mommy's Practical Baby Finds • Real-time Sync Active 🌸</p>
   </footer>
 
   <script>
@@ -193,6 +332,7 @@
     const db = firebase.firestore();
 
     let products = [];
+    let activeImageIndices = {}; // Track active photo slide per item ID
     let selectedCategory = "All Items";
     let isAdmin = localStorage.getItem("mommyAdmin") === "true";
     let pendingDeleteId = null;
@@ -213,30 +353,46 @@
 
     const initialProducts = [
       {
-        title: "Unilove New Born Diaper",
-        category: "Diapering Essentials",
+        title: "Unilove New Born Diaper - Unboxing & Demo",
+        category: "My Reviews & Videos",
         image: "https://cf.shopee.ph/file/ph-11134207-7r98o-lst1w10p4aep5c",
+        images: [
+          "https://cf.shopee.ph/file/ph-11134207-7r98o-lst1w10p4aep5c",
+          "https://placehold.co/600x600/fbcfe8/be185d?text=Soft+Waistband+Detail",
+          "https://placehold.co/600x600/fed7aa/c2410c?text=Absorbency+Test+Pass!"
+        ],
+        reviewNote: "Tested this overnight for baby line! Zero leakages and super gentle on sensitive skin 💕",
+        videoHighlightNote: "Check out timestamp 0:40 for the water absorbency test! 💧",
+        rating: 5,
         shopeeUrl: "https://shopee.ph",
-        tiktokUrl: "https://tiktok.com"
+        tiktokUrl: "https://tiktok.com",
+        facebookUrl: "https://facebook.com"
       },
       {
-        title: "Baby Bath Tub",
+        title: "Baby Bath Tub with Soft Cushion Support",
         category: "Bath Essentials",
         image: "https://cf.shopee.ph/file/ph-11134207-7qul3-lhx02m4x29g1a9",
         shopeeUrl: "https://shopee.ph",
         tiktokUrl: "https://tiktok.com"
       },
       {
-        title: "Baby Bath Towel with Hood",
+        title: "Baby Bath Towel with Hood - Ultra Absorbent",
         category: "Bath Essentials",
         image: "https://cf.shopee.ph/file/ph-11134207-7qul6-li22m0s4r9l02b",
         shopeeUrl: "https://shopee.ph",
         tiktokUrl: "https://tiktok.com"
       },
       {
-        title: "Aveeno Baby Hair and Body Wash",
-        category: "Bath Essentials",
+        title: "Aveeno Baby Hair and Body Wash Review",
+        category: "My Reviews & Videos",
         image: "https://cf.shopee.ph/file/ph-11134207-7qul5-lh1l1g52s4j42a",
+        images: [
+          "https://cf.shopee.ph/file/ph-11134207-7qul5-lh1l1g52s4j42a",
+          "https://placehold.co/600x600/e0f2fe/0369a1?text=Mild+Oatmeal+Formula"
+        ],
+        reviewNote: "Our holy grail for bath time! Very subtle scent and helped dry spots.",
+        videoHighlightNote: "Skip to 1:15 in the video to see lather consistency 🧼",
+        rating: 5,
         shopeeUrl: "https://shopee.ph",
         tiktokUrl: "https://tiktok.com"
       },
@@ -253,6 +409,7 @@
       renderCategories();
       updateAdminUI();
       listenToFirestore();
+      toggleCategoryFields();
     });
 
     function listenToFirestore() {
@@ -276,20 +433,32 @@
 
     function renderCategories() {
       const container = document.getElementById("categoryContainer");
-      container.innerHTML = categories.map(cat => `
-        <button onclick="selectCategory('${cat}')" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-          selectedCategory === cat 
-            ? "bg-pink-500 text-white shadow-sm" 
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-        }">
-          ${cat}
-        </button>
-      `).join("");
+      container.innerHTML = categories.map(cat => {
+        const isScrapbook = cat === "My Reviews & Videos";
+        const isActive = selectedCategory === cat;
+        return `
+          <button onclick="selectCategory('${cat}')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+            isActive 
+              ? (isScrapbook ? "bg-rose-500 text-white shadow-md shadow-rose-200" : "bg-pink-500 text-white shadow-sm") 
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+          }">
+            ${isScrapbook ? '📸 ' : ''}${cat}
+          </button>
+        `;
+      }).join("");
     }
 
     function selectCategory(cat) {
       selectedCategory = cat;
       renderCategories();
+      
+      const banner = document.getElementById("scrapbookBanner");
+      if (cat === "My Reviews & Videos") {
+        banner.classList.remove("hidden");
+      } else {
+        banner.classList.add("hidden");
+      }
+      
       renderProducts();
     }
 
@@ -301,46 +470,195 @@
 
       if (filtered.length === 0) {
         grid.innerHTML = `
-          <div class="col-span-full py-12 text-center text-slate-400">
-            <i class="fa-solid fa-box-open text-4xl mb-2"></i>
-            <p>No items found in this category yet.</p>
+          <div class="col-span-full py-16 text-center text-slate-400">
+            <div class="w-16 h-16 bg-pink-50 text-pink-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+              <i class="fa-solid fa-box-open"></i>
+            </div>
+            <p class="font-semibold text-slate-600">No items found in this section yet.</p>
+            <p class="text-xs text-slate-400 mt-1">Switch category or click "Add Item" as Admin.</p>
           </div>
         `;
         return;
       }
 
-      grid.innerHTML = filtered.map(item => `
-        <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 flex flex-col justify-between relative group hover:shadow-md transition">
-          ${isAdmin ? `
-            <div class="absolute top-3 right-3 z-10 flex gap-2 bg-white/90 backdrop-blur-xs p-1.5 rounded-full shadow-md">
-              <button onclick="openProductModal('${item.id}')" class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition">
-                <i class="fa-solid fa-pen text-xs"></i>
-              </button>
-              <button onclick="promptDeleteProduct('${item.id}')" class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition">
-                <i class="fa-solid fa-trash text-xs"></i>
-              </button>
+      grid.innerHTML = filtered.map((item, index) => {
+        const isScrapbookItem = item.category === "My Reviews & Videos";
+        const itemImages = (item.images && item.images.length > 0) ? item.images : [item.image];
+        const activeIdx = activeImageIndices[item.id] || 0;
+        const currentImg = itemImages[activeIdx] || item.image;
+
+        // Random subtle rotation for polaroid effect
+        const rotations = ['rotate-[-1.5deg]', 'rotate-[1.5deg]', 'rotate-[-2deg]', 'rotate-[1deg]'];
+        const tilt = rotations[index % rotations.length];
+
+        if (isScrapbookItem) {
+          return `
+            <div class="polaroid-frame rounded-2xl p-4 flex flex-col justify-between relative group ${tilt} border border-rose-100/80">
+              <!-- Washi Tape Accent -->
+              <div class="washi-tape absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-6 z-10 opacity-90"></div>
+
+              ${isAdmin ? `
+                <div class="absolute top-4 right-4 z-20 flex gap-1.5 bg-white/90 backdrop-blur-xs p-1.5 rounded-full shadow-md">
+                  <button onclick="openProductModal('${item.id}')" class="w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition">
+                    <i class="fa-solid fa-pen text-[10px]"></i>
+                  </button>
+                  <button onclick="promptDeleteProduct('${item.id}')" class="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition">
+                    <i class="fa-solid fa-trash text-[10px]"></i>
+                  </button>
+                </div>
+              ` : ''}
+
+              <div>
+                <!-- Polaroid Photo Container -->
+                <div class="relative bg-slate-100 rounded-xl overflow-hidden aspect-square border border-slate-200/60 group/photo">
+                  <img src="${currentImg}" alt="${item.title}" onclick="openLightbox('${currentImg}', '${escapeQuotes(item.title)}')" class="w-full h-full object-cover cursor-zoom-in group-hover/photo:scale-105 transition duration-500" onerror="this.src='https://placehold.co/400x400/ffe4e6/9f1239?text=Mommy+Review'">
+                  
+                  <!-- Photo Count Badge -->
+                  ${itemImages.length > 1 ? `
+                    <div class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs flex items-center gap-1">
+                      <i class="fa-solid fa-images"></i> ${activeIdx + 1}/${itemImages.length}
+                    </div>
+                  ` : ''}
+
+                  <!-- Zoom Icon Overlay -->
+                  <div onclick="openLightbox('${currentImg}', '${escapeQuotes(item.title)}')" class="absolute top-2 left-2 bg-white/80 text-slate-700 p-1.5 rounded-lg text-xs opacity-0 group-hover/photo:opacity-100 transition cursor-pointer">
+                    <i class="fa-solid fa-expand"></i>
+                  </div>
+                </div>
+
+                <!-- Multi-photo Thumbnail Strip -->
+                ${itemImages.length > 1 ? `
+                  <div class="flex gap-1.5 mt-2.5 overflow-x-auto no-scrollbar py-1">
+                    ${itemImages.map((img, imgIdx) => `
+                      <button onclick="switchPhoto('${item.id}', ${imgIdx})" class="w-10 h-10 rounded-lg overflow-hidden border-2 transition shrink-0 ${
+                        activeIdx === imgIdx ? 'border-rose-500 scale-105 shadow-xs' : 'border-slate-200 opacity-60 hover:opacity-100'
+                      }">
+                        <img src="${img}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100?text=Pic'">
+                      </button>
+                    `).join('')}
+                  </div>
+                ` : ''}
+
+                <!-- Review Stars & Title -->
+                <div class="mt-3">
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="text-amber-400 text-xs font-bold">
+                      ${'★'.repeat(item.rating || 5)}${'☆'.repeat(5 - (item.rating || 5))}
+                    </div>
+                    <span class="text-[10px] bg-rose-50 text-rose-600 font-bold px-2 py-0.5 rounded-full border border-rose-200">
+                      Mommy Approved 💕
+                    </span>
+                  </div>
+                  <h3 class="font-bold text-slate-800 text-base leading-snug">${item.title}</h3>
+                </div>
+
+                <!-- Mommy Journal Sticky Note -->
+                ${item.reviewNote ? `
+                  <div class="paper-note mt-3 p-3 rounded-xl border border-amber-200/80 relative">
+                    <span class="text-[10px] font-bold uppercase text-amber-800 tracking-wider block mb-0.5">Mommy's Notes:</span>
+                    <p class="text-xs text-slate-700 font-handwriting text-sm leading-snug">
+                      "${item.reviewNote}"
+                    </p>
+                  </div>
+                ` : ''}
+
+                <!-- Video Timestamp / Part Highlight Card -->
+                ${item.videoHighlightNote ? `
+                  <div class="mt-2.5 bg-gradient-to-r from-purple-50 to-pink-50 p-2.5 rounded-xl border border-purple-200/70 flex items-start gap-2 text-xs">
+                    <div class="text-purple-600 text-sm mt-0.5">🎥</div>
+                    <div>
+                      <span class="font-bold text-purple-900 block text-[11px]">Video Highlight:</span>
+                      <p class="text-purple-700 text-xs font-medium leading-tight">${item.videoHighlightNote}</p>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+
+              <!-- Action Links (Shopee, TikTok, Facebook) -->
+              <div class="space-y-2 mt-4 pt-2 border-t border-dashed border-slate-200">
+                ${item.shopeeUrl ? `
+                  <a href="${item.shopeeUrl}" target="_blank" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition">
+                    <i class="fa-solid fa-bag-shopping"></i> Buy on Shopee
+                  </a>
+                ` : ''}
+                
+                <div class="grid grid-cols-2 gap-2">
+                  ${item.tiktokUrl ? `
+                    <a href="${item.tiktokUrl}" target="_blank" class="bg-slate-900 hover:bg-black text-white py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition">
+                      <i class="fa-brands fa-tiktok text-xs"></i> Watch TikTok
+                    </a>
+                  ` : ''}
+                  ${item.facebookUrl ? `
+                    <a href="${item.facebookUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition">
+                      <i class="fa-brands fa-facebook text-xs"></i> Facebook Video
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
             </div>
-          ` : ''}
-          <div>
-            <div class="aspect-square w-full rounded-2xl overflow-hidden bg-pink-50 mb-3">
-              <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/300x300/fecdd3/9f1239?text=Baby+Find'">
+          `;
+        }
+
+        // Standard Product Card
+        return `
+          <div class="bg-white rounded-3xl p-4 shadow-xs border border-slate-100 flex flex-col justify-between relative group hover:shadow-md transition duration-300">
+            ${isAdmin ? `
+              <div class="absolute top-3 right-3 z-10 flex gap-1.5 bg-white/90 backdrop-blur-xs p-1.5 rounded-full shadow-md">
+                <button onclick="openProductModal('${item.id}')" class="w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition">
+                  <i class="fa-solid fa-pen text-[10px]"></i>
+                </button>
+                <button onclick="promptDeleteProduct('${item.id}')" class="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition">
+                  <i class="fa-solid fa-trash text-[10px]"></i>
+                </button>
+              </div>
+            ` : ''}
+            <div>
+              <div class="aspect-square w-full rounded-2xl overflow-hidden bg-pink-50/50 mb-3 relative">
+                <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/300x300/fecdd3/9f1239?text=Baby+Find'">
+              </div>
+              <span class="text-[10px] font-bold text-pink-600 bg-pink-50 px-2.5 py-1 rounded-full uppercase tracking-wider inline-block mb-1.5">
+                ${item.category}
+              </span>
+              <h3 class="font-bold text-slate-800 text-sm mb-3 leading-snug line-clamp-2">${item.title}</h3>
             </div>
-            <h3 class="font-bold text-slate-800 text-sm mb-3 line-clamp-2">${item.title}</h3>
+            <div class="space-y-2 mt-auto">
+              ${item.shopeeUrl ? `
+                <a href="${item.shopeeUrl}" target="_blank" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition">
+                  <i class="fa-solid fa-bag-shopping"></i> Shopee
+                </a>
+              ` : ''}
+              ${item.tiktokUrl ? `
+                <a href="${item.tiktokUrl}" target="_blank" class="w-full bg-slate-900 hover:bg-black text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition">
+                  <i class="fa-brands fa-tiktok"></i> TikTok Shop
+                </a>
+              ` : ''}
+            </div>
           </div>
-          <div class="space-y-2 mt-auto">
-            ${item.shopeeUrl ? `
-              <a href="${item.shopeeUrl}" target="_blank" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition">
-                <i class="fa-solid fa-bag-shopping"></i> Shopee
-              </a>
-            ` : ''}
-            ${item.tiktokUrl ? `
-              <a href="${item.tiktokUrl}" target="_blank" class="w-full bg-slate-900 hover:bg-black text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition">
-                <i class="fa-brands fa-tiktok"></i> TikTok
-              </a>
-            ` : ''}
-          </div>
-        </div>
-      `).join("");
+        `;
+      }).join("");
+    }
+
+    function switchPhoto(itemId, photoIdx) {
+      activeImageIndices[itemId] = photoIdx;
+      renderProducts();
+    }
+
+    function openLightbox(imgUrl, caption) {
+      const modal = document.getElementById("lightboxModal");
+      const img = document.getElementById("lightboxImg");
+      const cap = document.getElementById("lightboxCaption");
+      
+      img.src = imgUrl;
+      cap.innerText = caption;
+      modal.classList.remove("hidden");
+    }
+
+    function closeLightbox() {
+      document.getElementById("lightboxModal").classList.add("hidden");
+    }
+
+    function escapeQuotes(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
 
     function openAdminLoginModal() {
@@ -386,6 +704,17 @@
       }
     }
 
+    // Dynamic field toggle for Scrapbook Review category
+    function toggleCategoryFields() {
+      const category = document.getElementById("productCategory").value;
+      const scrapbookFields = document.getElementById("scrapbookFields");
+      if (category === "My Reviews & Videos") {
+        scrapbookFields.classList.remove("hidden");
+      } else {
+        scrapbookFields.classList.add("hidden");
+      }
+    }
+
     function openProductModal(id = null) {
       const modal = document.getElementById("productModal");
       const title = document.getElementById("modalTitle");
@@ -396,15 +725,29 @@
         document.getElementById("productId").value = item.id;
         document.getElementById("productTitle").value = item.title;
         document.getElementById("productCategory").value = item.category;
-        document.getElementById("productImage").value = item.image;
+        document.getElementById("productImage").value = item.image || '';
+        
+        // Multiple Images text
+        const imagesList = (item.images && item.images.length) ? item.images.join("\n") : (item.image || '');
+        document.getElementById("productImages").value = imagesList;
+        
+        document.getElementById("productRating").value = item.rating || "5";
+        document.getElementById("productReviewNote").value = item.reviewNote || '';
+        document.getElementById("videoHighlightNote").value = item.videoHighlightNote || '';
         document.getElementById("shopeeUrl").value = item.shopeeUrl || '';
         document.getElementById("tiktokUrl").value = item.tiktokUrl || '';
-        title.innerText = "Edit Product";
+        document.getElementById("facebookUrl").value = item.facebookUrl || '';
+        title.innerText = "Edit Product & Review";
       } else {
         document.getElementById("productForm").reset();
         document.getElementById("productId").value = '';
-        title.innerText = "Add New Product";
+        if (selectedCategory !== "All Items") {
+          document.getElementById("productCategory").value = selectedCategory;
+        }
+        title.innerText = "Add New Product / Scrapbook Item";
       }
+
+      toggleCategoryFields();
       modal.classList.remove("hidden");
     }
 
@@ -419,30 +762,50 @@
       saveBtn.innerText = "Saving to Database...";
 
       const id = document.getElementById("productId").value;
+      const mainImage = document.getElementById("productImage").value;
+      
+      // Parse multiple images
+      const rawImagesText = document.getElementById("productImages").value;
+      const parsedImages = rawImagesText
+        .split("\n")
+        .map(url => url.trim())
+        .filter(url => url.length > 0);
+
+      // Ensure main image is included
+      if (parsedImages.length === 0 && mainImage) {
+        parsedImages.push(mainImage);
+      }
+
       const data = {
         title: document.getElementById("productTitle").value,
         category: document.getElementById("productCategory").value,
-        image: document.getElementById("productImage").value,
+        image: mainImage || (parsedImages[0] || ''),
+        images: parsedImages,
+        rating: parseInt(document.getElementById("productRating").value || "5"),
+        reviewNote: document.getElementById("productReviewNote").value,
+        videoHighlightNote: document.getElementById("videoHighlightNote").value,
         shopeeUrl: document.getElementById("shopeeUrl").value,
         tiktokUrl: document.getElementById("tiktokUrl").value,
+        facebookUrl: document.getElementById("facebookUrl").value,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
 
       try {
         if (id) {
           await db.collection("products").doc(id).update(data);
-          showToast("Product updated!");
+          showToast("Item updated successfully!");
         } else {
           data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
           await db.collection("products").add(data);
-          showToast("Product added successfully!");
+          showToast("New review item saved!");
         }
         closeProductModal();
       } catch (err) {
+        console.error("Save Error:", err);
         showToast("Error saving product", false);
       } finally {
         saveBtn.disabled = false;
-        saveBtn.innerText = "Save Product";
+        saveBtn.innerText = "Save Product & Review";
       }
     }
 
@@ -461,7 +824,7 @@
       if (!pendingDeleteId) return;
       try {
         await db.collection("products").doc(pendingDeleteId).delete();
-        showToast("Product deleted!");
+        showToast("Item deleted!");
       } catch (err) {
         showToast("Error deleting product", false);
       } finally {
@@ -476,8 +839,8 @@
 
       toastMsg.innerText = msg;
       toastIcon.className = isSuccess 
-        ? "fa-solid fa-circle-check text-green-400 text-sm" 
-        : "fa-solid fa-circle-xmark text-red-400 text-sm";
+        ? "fa-solid fa-circle-check text-emerald-400 text-sm" 
+        : "fa-solid fa-circle-xmark text-rose-400 text-sm";
 
       toast.classList.remove("opacity-0", "pointer-events-none");
       setTimeout(() => {
